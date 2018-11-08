@@ -1,0 +1,44 @@
+{
+    "name": "julibo/msfoole-demo",
+    "description": "msfoole示例工程",
+    "type": "project",
+    "keywords": [
+        "msfoole-demo",
+        "msfoole",
+        "swoole"
+    ],
+    "homepage": "http://msfoole.julibo.com",
+    "license": "MIT",
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        }
+    },
+    "authors": [
+        {
+            "name": "carson",
+            "email": "yuzhanwei@aliyun.com",
+            "homepage": "http://msfoole.julibo.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "julibo/msfoole": "dev-develop"
+    },
+    "require-dev": {
+        "easyswoole/swoole-ide-helper": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "extra": {},
+    "config": {
+        "vendor-dir": "vendor",
+        "preferred-install": "dist"
+    }
+}

@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+define('DS', DIRECTORY_SEPARATOR);
+define('ROOT_PATH', dirname(__DIR__) . DS);
+define('APP_PATH', ROOT_PATH. 'app' . DS );
+define('CONF_PATH', ROOT_PATH . 'config' . DS);
+define('RUN_PATH', ROOT_PATH . 'runtime' . DS);
+define('CACHE_PATH', RUN_PATH . 'cache' . DS);
+define('LOG_PATH', RUN_PATH . 'logs' . DS);
+define('TEMP_PATH', RUN_PATH . 'temp' . DS);
+
+require __DIR__ . '/../vendor/julibo/msfoole/src/console.php';
