@@ -1,8 +1,8 @@
 /.idea
 /.vscode
 /vendor
-/tmp
-/dev
+/runtime
 *.log
+*.pid
 .env
 .local
