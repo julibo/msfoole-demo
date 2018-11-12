@@ -9,4 +9,4 @@ define('CACHE_PATH', RUN_PATH . 'cache' . DS);
 define('LOG_PATH', RUN_PATH . 'logs' . DS);
 define('TEMP_PATH', RUN_PATH . 'temp' . DS);
 
-require __DIR__ . '/../vendor/julibo/msfoole/src/console.php';
+require ROOT_PATH . 'vendor/julibo/msfoole/src/console.php';
