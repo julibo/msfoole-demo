@@ -6,3 +6,4 @@
 *.pid
 .env
 .local
+composer.lock
