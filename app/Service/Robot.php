@@ -6,6 +6,8 @@
 namespace App\Service;
 
 use App\Logic\HospitalApi;
+use APP\Logic\PaymentApi;
+use Julibo\Msfoole\Helper;
 
 class Robot extends BaseServer
 {
@@ -43,6 +45,9 @@ class Robot extends BaseServer
         return $result;
     }
 
+    /**
+     * 挂号
+     */
     public function register()
     {
         $content = [
@@ -57,6 +62,9 @@ class Robot extends BaseServer
         return $result;
     }
 
+    /**
+     * 取消挂号
+     */
     public function cancel()
     {
         $content = [
@@ -65,6 +73,25 @@ class Robot extends BaseServer
         ];
         $result = HospitalApi::getInstance()->apiClient('ghdjzf', $content);
         return $result;
+    }
+
+    public function createOrder()
+    {
+        $param = [
+            'out_trade_no' => Helper::guid(),
+            'body' => '接口测试',
+            'attach' => '附加信息',
+            'total_fee' => '0.01',
+            'mch_create_ip' => '114.215.190.171',
+            'time_start' => date('YmdHis'),
+            'time_expire' => date('YmdHis', strtotime('30 minutes')),
+        ];
+        PaymentApi::getInstance()->createOrder($param);
+    }
+
+    public function callback()
+    {
+        PaymentApi::getInstance()->callback();
     }
 
 }

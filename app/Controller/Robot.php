@@ -59,7 +59,17 @@ class Robot
      */
     public function createOrder()
     {
+        $result = RobotServer::getInstance()->createOrder();
+        return $result;
+    }
 
+    /**
+     * 支付回调
+     */
+    public function callback()
+    {
+        $result = RobotServer::getInstance()->callback();
+        return $result;
     }
 
 }
