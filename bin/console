@@ -8,5 +8,6 @@ define('RUN_PATH', ROOT_PATH . 'runtime' . DS);
 define('CACHE_PATH', RUN_PATH . 'cache' . DS);
 define('LOG_PATH', RUN_PATH . 'logs' . DS);
 define('TEMP_PATH', RUN_PATH . 'temp' . DS);
+define('CONTROLLER_NAMESPACE', '\\App\\Controller\\');
 
 require ROOT_PATH . 'vendor/julibo/msfoole/src/console.php';
