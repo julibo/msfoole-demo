@@ -96,6 +96,7 @@ class PaymentApi
         $this->resHandler->setContent($xml);
         $this->resHandler->setKey($this->cfg['key']);
         if($this->resHandler->isTenpaySign()) {
+
             if($this->resHandler->getParameter('status') == 0 && $this->resHandler->getParameter('result_code') == 0){
                 //echo $this->resHandler->getParameter('status');
                 // 11;
@@ -103,12 +104,12 @@ class PaymentApi
 
                 Utils::dataRecodes('接口回调收到通知参数',$this->resHandler->getAllParameters());
                 echo 'success';
-                exit();
             }else{
+                Utils::dataRecodes('接口回调收到通知参数failure1');
                 echo 'failure1';
-                exit();
             }
         } else {
+            Utils::dataRecodes('接口回调收到通知参数failure2');
             echo 'failure2';
         }
     }

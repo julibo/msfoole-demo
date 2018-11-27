@@ -15,7 +15,7 @@ class Utils{
     }
     
     public static function dataRecodes($title,$data){
-        $handler = fopen('result.txt','a+');
+        $handler = fopen(RUN_PATH . 'result.txt','a+');
         $content = "================".$title."===================\n";
         if(is_string($data) === true){
             $content .= $data."\n";
