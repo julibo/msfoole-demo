@@ -11,11 +11,6 @@ use App\Service\Robot as RobotServer;
 class Robot extends BaseController
 {
 
-    protected function init()
-    {
-        // TODO: Implement init() method.
-    }
-
     /**
      * 获取当前用户信息
      */

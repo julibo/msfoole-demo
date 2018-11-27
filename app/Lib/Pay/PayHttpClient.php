@@ -39,7 +39,7 @@ class PayHttpClient {
 	
 	
 	function PayHttpClient() {
-		$this->reqContent = "";
+		// $this->reqContent = "";
 		$this->resContent = "";
 		
 		$this->errInfo = "";

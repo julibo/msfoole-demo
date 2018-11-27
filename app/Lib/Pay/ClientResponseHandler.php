@@ -15,7 +15,8 @@
  */
 namespace App\Lib\Pay;
 
-class ClientResponseHandler  {
+class ClientResponseHandler
+{
 	
 	/** MD5密钥 */
 	var $key;

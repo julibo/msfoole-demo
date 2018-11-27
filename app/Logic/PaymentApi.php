@@ -39,7 +39,6 @@ class PaymentApi
         $this->reqHandler = new RequestHandler();
         $this->pay = new PayHttpClient();
         $this->cfg = Config::get('pay.weifutong');
-
         $this->reqHandler->setGateUrl($this->cfg['url']);
 
         $sign_type = $this->cfg['sign_type'];
@@ -81,10 +80,8 @@ class PaymentApi
                         'code_url'=>$this->resHandler->getParameter('code_url'),
                         'code_status'=>$this->resHandler->getParameter('code_status'),
                         'type'=>$this->reqHandler->getParameter('service')), JSON_UNESCAPED_SLASHES);
-                    exit();
                 }else{
                     echo json_encode(array('status'=>500,'msg'=>'Error Code:'.$this->resHandler->getParameter('err_code').' Error Message:'.$this->resHandler->getParameter('err_msg')));
-                    exit();
                 }
             }
             echo json_encode(array('status'=>500,'msg'=>'Error Code:'.$this->resHandler->getParameter('status').' Error Message:'.$this->resHandler->getParameter('message')));
