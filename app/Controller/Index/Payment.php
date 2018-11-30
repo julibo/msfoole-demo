@@ -3,7 +3,7 @@
  * 第三方回调
  */
 
-namespace App\Controller;
+namespace App\Controller\Index;
 
 use Julibo\Msfoole\HttpController as BaseController;
 
