@@ -7,6 +7,7 @@ namespace App\Logic;
 
 use GuzzleHttp\Client;
 use Julibo\Msfoole\Facade\Config;
+use App\Validator\Feedback;
 
 class HospitalApi
 {
@@ -16,12 +17,19 @@ class HospitalApi
     private $apiUser;
     private $client;
 
+    /**
+     * 构造函数
+     */
     private function __construct()
     {
         $this->apiHost = Config::get('api.hospital.host');
         $this->apiUser = Config::get('api.hospital.user');
     }
 
+    /**
+     * 实例化
+     * @return HospitalApi
+     */
     public static function getInstance() : self
     {
         if (is_null(self::$instance)) {
@@ -52,10 +60,10 @@ class HospitalApi
         $response = $this->client->request('POST', $this->apiHost, [
             'body' => json_encode($body)
         ]);
-        echo $data = $response->getBody();
+        $data = $response->getBody();
         $data = json_decode($data, true);
         if (empty($data) || !isset($data['errorcode']) || !isset($data['response'])) {
-            throw new \Exception('接口异常', 100);
+            throw new \Exception(Feedback::$Exception['INTERFACE_EXCEPTION_API']['msg'], Feedback::$Exception['INTERFACE_EXCEPTION_API']['code']);
         }
         if ($data['errorcode'] != 0) {
             throw new \Exception($data['msg'], $data['errorcode']);
@@ -63,5 +71,21 @@ class HospitalApi
         $result = $data['response'];
         return $result;
     }
+
+    /**
+     * 通过卡号查询用户信息
+     * @param string $cardno
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function getUser(string $cardno) : array
+    {
+//        $response = $this->apiClient('byxx', ['kh'=>$cardno]);
+//        $result = $response['item'];
+//        $result['cardno'] = $cardno;
+//        return $result;
+        return json_decode('{"xm":"刘青洋","xb":"男","mz":"汉族","dabh":"00000005","csrq":"1982-04-05","cardno":"00000005"}', true);
+    }
+
 
 }

@@ -16,7 +16,28 @@ class Robot extends BaseController
      */
     public function getUserInfo()
     {
-        $result = RobotServer::getInstance()->getUserInfo();
+        $result = $this->user;
+        return $result;
+    }
+
+    /**
+     * 获取挂号信息
+     */
+    public function getTodayRegister()
+    {
+        $cardno = $this->user->cardno;
+        $result = RobotServer::getInstance()->getTodayRegister($cardno);
+        return $result;
+    }
+
+    /**
+     * 取消挂号
+     */
+    public function cancelReg()
+    {
+        $cardno = $this->user->cardno;
+        $mzh = $this->params['mzh'] ?? null;
+        $result = RobotServer::getInstance()->cancelReg($cardno, $mzh);
         return $result;
     }
 
@@ -34,25 +55,8 @@ class Robot extends BaseController
      */
     public function getSourceList()
     {
-        $result = RobotServer::getInstance()->getSourceList();
-        return $result;
-    }
-
-    /**
-     * 获取医生详情
-     */
-    public function getDoctorInfo()
-    {
-        $result = RobotServer::getInstance()->register();
-        return $result;
-    }
-
-    /**
-     * 挂号预览
-     */
-    public function previewRegister()
-    {
-        $result = RobotServer::getInstance()->cancel();
+        $ksbm = $this->params['ksbm'] ?? null;
+        $result = RobotServer::getInstance()->getSourceList($ksbm);
         return $result;
     }
 
@@ -61,16 +65,12 @@ class Robot extends BaseController
      */
     public function createOrder()
     {
-        $result = RobotServer::getInstance()->createOrder();
-        return $result;
-    }
-
-    /**
-     * 支付回调
-     */
-    public function callback()
-    {
-        $result = RobotServer::getInstance()->callback();
+        $cardno = $this->user->cardno;
+        $ysbh = $this->params['ysbh'] ?? null;
+        $bb = $this->params['bb'] ?? null;
+        $zfje = $this->params['zfje'] ?? null;
+        $zfzl = $this->params['zfzl'] ?? null;
+        $result = RobotServer::getInstance()->createOrder($cardno, $ysbh, $bb, $zfje, $zfzl);
         return $result;
     }
 

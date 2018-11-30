@@ -10,7 +10,7 @@ abstract class BaseServer
 {
     protected static $instance = [];
 
-    protected function __construct()
+    public function __construct()
     {
         $this->init();
     }
