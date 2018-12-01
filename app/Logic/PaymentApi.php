@@ -12,6 +12,7 @@ use App\Lib\Pay\Utils;
 use Julibo\Msfoole\Facade\Config;
 use App\Model\Order as OrderModel;
 use Julibo\Msfoole\Facade\Log;
+use Julibo\Msfoole\Channel;
 
 class PaymentApi
 {
@@ -110,6 +111,17 @@ class PaymentApi
                         // 更改订单状态
                         $updateResult = OrderModel::getInstance()->updateOrderStatus($order['id'], 1);
                         if ($updateResult) {
+                            switch ($order['source']) {
+                                case 1:
+                                    $data = [
+                                        'namespace' => '\\App\\Service\\',
+                                        'class' =>'Robot',
+                                        'action' =>'register',
+                                        'data' => $order
+                                    ];
+                                    Channel::instance()->push($data);
+                                    break;
+                            }
                             return 'success';
                         }
                     } else {
@@ -122,6 +134,54 @@ class PaymentApi
         } else {
             return 'failure';
         }
+    }
+
+
+    /**
+     * 提交退款
+     */
+    public function submitRefund($params)
+    {
+        $this->reqHandler->setReqParams($params,array('method'));
+        $reqParam = $this->reqHandler->getAllParameters();
+        if(empty($reqParam['transaction_id']) && empty($reqParam['out_trade_no'])){
+            throw new \Exception('请输入商户订单号!', 120);
+        }
+        $this->reqHandler->setParameter('version',$this->cfg['version']);
+        $this->reqHandler->setParameter('service','unified.trade.refund');//接口类型：unified.trade.refund
+        $this->reqHandler->setParameter('mch_id',$this->cfg['mchId']);//必填项，商户号，由威富通分配
+        $this->reqHandler->setParameter('nonce_str', $params['nonce_str']);//随机字符串，必填项，不长于 32 位
+        $this->reqHandler->setParameter('op_user_id',$this->cfg['mchId']);//必填项，操作员帐号,默认为商户号
+        $this->reqHandler->setParameter('sign_type',$this->cfg['sign_type']);
+
+        $this->reqHandler->createSign();//创建签名
+        $data = Utils::toXml($this->reqHandler->getAllParameters());//将提交参数转为xml，目前接口参数也只支持XML方式
+
+        $this->pay->setReqContent($this->reqHandler->getGateURL(),$data);
+        if($this->pay->call()){
+            $this->resHandler->setContent($this->pay->getResContent());
+            $this->resHandler->setKey($this->reqHandler->getKey());
+            if($this->resHandler->isTenpaySign()){
+                if($this->resHandler->getParameter('status') == 0 && $this->resHandler->getParameter('result_code') == 0){
+//                    $res = array('transaction_id'=>$this->resHandler->getParameter('transaction_id'),
+//                                 'out_trade_no'=>$this->resHandler->getParameter('out_trade_no'),
+//                                 'out_refund_no'=>$this->resHandler->getParameter('out_refund_no'),
+//                                 'refund_id'=>$this->resHandler->getParameter('refund_id'),
+//                                 'refund_channel'=>$this->resHandler->getParameter('refund_channel'),
+//                                 'refund_fee'=>$this->resHandler->getParameter('refund_fee'),
+//                                 'coupon_refund_fee'=>$this->resHandler->getParameter('coupon_refund_fee'));
+                    $res = $this->resHandler->getAllParameters();
+                    Log::info('提交退款成功：' . json_encode($res));
+                    return true;
+                }else{
+                    Log::error('提交退款失败3：' . 'Error Code:'.$this->resHandler->getParameter('err_code').' Error Message:'.$this->resHandler->getParameter('err_msg'));
+                }
+            }
+            Log::error('提交退款失败2：' . 'Error Code:'.$this->resHandler->getParameter('status').' Error Message:'.$this->resHandler->getParameter('message'));
+        }else{
+            Log::error('提交退款失败1：' . 'Response Code:'.$this->pay->getResponseCode().' Error Info:'.$this->pay->getErrInfo());
+        }
+        return false;
     }
 
 

@@ -7,6 +7,7 @@ namespace App\Service;
 
 use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
+use App\Model\Order;
 use Julibo\Msfoole\Facade\Config;
 use App\Model\Order as OrderModel;
 use App\Model\Bill as BillModel;
@@ -89,7 +90,25 @@ class Robot extends BaseServer
         if (empty($cardno) || empty($mzh)) {
             throw new \Exception('缺少必要的参数', 200);
         }
+        # 取得订单
+        $morder = Order::getInstance()->getOrderByCode($mzh);
+        if (empty($morder)) {
+            throw new \Exception('订单不存在', 210);
+        }
+        $params = [
+            'out_trade_no' => $morder['out_trade_no'],
+            'out_refund_no' => $morder['out_trade_no'] . 'R',
+            'total_fee' => $morder['total_fee'],
+            'refund_fee' => $morder['total_fee'],
+            'refund_channel' => 'ORIGINAL',
+            'nonce_str' => Helper::guid()
+        ];
+        $refundResult = PaymentApi::getInstance()->submitRefund($params);
+        if (!$refundResult) {
+            throw new \Exception('退款失败请重试', 220);
+        }
         HospitalApi::getInstance()->apiClient('ghdjzf', ['kh'=>$cardno, 'mzh' => $mzh]);
+        # 退款
         throw new \Exception('结果超出预期', 201);
     }
 
@@ -173,27 +192,32 @@ class Robot extends BaseServer
      */
     public function callbackWFT($xml)
     {
-        Log::error($xml);
         return PaymentApi::getInstance()->callback($xml);
     }
 
-
     /**
-     * todo
      * 挂号
      */
-    public function register()
+    public function register($data)
     {
+        $orderId = $data['out_trade_no'];
+        $info = json_decode($data['info'], true);
         $content = [
-            "kh" => "00000005",
-            "ysbh" => "1",
-            "bb" => "2",
-            "zfje" => "11",
-            "zfzl" => "1",
-            "sjh" => "a0001"
+            "kh" => $info['cardno'],
+            "ysbh" => $info['ysbh'],
+            "bb" => $info['bb'],
+            "zfje" => $info['zfje'],
+            "zfzl" => $info['zfzl'],
+            "sjh" => $orderId
         ];
-        $result = HospitalApi::getInstance()->apiClient('ghdj', $content);
-        return $result;
+        $response = HospitalApi::getInstance()->apiClient('ghdj', $content);
+        if (!empty($response['item']['mzh'])) {
+            // 更新订单
+            OrderModel::getInstance()->updateOrderStatus($data['id'], $response['item']['mzh'], 2);
+            // 发送短信
+            App\Lib\Helper\Message::sendSms('181410106050', '挂号成功，欢迎就诊！');
+        }
+        return 10000;
     }
 
 }

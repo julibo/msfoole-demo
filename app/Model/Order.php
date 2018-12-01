@@ -92,13 +92,30 @@ class Order extends BaseModel
      * @throws \think\Exception
      * @throws \think\db\exception\PDOException
      */
-    public function updateOrderStatus($id, $status = 1)
+    public function updateOrderStatus($id, $status = 1, $code = 0)
     {
         $result = $this->db
             ->where('id', $id)
             ->update([
-                'status'  => $status
+                'status'  => $status,
+                'code' => $code,
             ]);
+        return $result;
+    }
+
+    /**
+     * 通过操作码取得订单
+     * @param $code
+     * @return array|\PDOStatement|string|\think\Model|null
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getOrderByCode($code)
+    {
+        $result = $this->db
+            ->where('code', $code)
+            ->find();
         return $result;
     }
 }
