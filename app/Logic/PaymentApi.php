@@ -10,6 +10,8 @@ use App\Lib\Pay\ClientResponseHandler;
 use App\Lib\Pay\PayHttpClient;
 use App\Lib\Pay\Utils;
 use Julibo\Msfoole\Facade\Config;
+use App\Model\Order as OrderModel;
+use Julibo\Msfoole\Facade\Log;
 
 class PaymentApi
 {
@@ -91,27 +93,34 @@ class PaymentApi
 
     }
 
-    public function callback()
+    public function callback($xml)
     {
-        $xml = file_get_contents('php://input');
         $this->resHandler->setContent($xml);
         $this->resHandler->setKey($this->cfg['key']);
         if($this->resHandler->isTenpaySign()) {
-
-            if($this->resHandler->getParameter('status') == 0 && $this->resHandler->getParameter('result_code') == 0){
-                //echo $this->resHandler->getParameter('status');
-                // 11;
-                //更改订单状态
-
-                Utils::dataRecodes('接口回调收到通知参数',$this->resHandler->getAllParameters());
-                echo 'success';
+            // 日志记录
+            Log::info('接口回调收到通知参数：' . json_encode($this->resHandler->getAllParameters()));
+            if($this->resHandler->getParameter('status') == 0 && $this->resHandler->getParameter('result_code') == 0) {
+                // 查询对应的订单
+                $orderID = $this->resHandler->getParameter('out_trade_no');
+                $totalFee = $this->resHandler->getParameter('total_fee');
+                $order = OrderModel::getInstance()->getOrderByTradeNo($orderID);
+                if ($order && $order['total_fee'] == $totalFee) {
+                    if ($order['status'] == 0) {
+                        // 更改订单状态
+                        $updateResult = OrderModel::getInstance()->updateOrderStatus($order['id'], 1);
+                        if ($updateResult) {
+                            return 'success';
+                        }
+                    } else {
+                        return 'success';
+                    }
+                }
             }else{
-                Utils::dataRecodes('接口回调收到通知参数failure1');
-                echo 'failure1';
+                return 'failure';
             }
         } else {
-            Utils::dataRecodes('接口回调收到通知参数failure2');
-            echo 'failure2';
+            return 'failure';
         }
     }
 

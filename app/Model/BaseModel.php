@@ -20,7 +20,7 @@ abstract class BaseModel
      * 表名
      * @var
      */
-    protected $table;
+    protected static $table;
 
     /**
      * @var \think\db\Query
@@ -46,8 +46,7 @@ abstract class BaseModel
         $defaultConfig = Config::get('database.default');
         $config = array_merge($defaultConfig, $config);
         Db::setConfig($config);
-        $this->table = $table;
-        $this->db = Db::table($this->table);
+        $this->db = Db::table($table);
     }
 
     /**
@@ -58,15 +57,14 @@ abstract class BaseModel
 
     /**
      * 实例化
-     * @param $table
      * @param array $config
      * @return mixed
      */
-    public static function getInstance($table, $config = [])
+    public static function getInstance($config = [])
     {
-        if (empty(self::$instanse[$table])) {
-            self::$instanse[$table] = new static($table, $config);
+        if (empty(self::$instanse[static::$table])) {
+            self::$instanse[static::$table] = new static(static::$table, $config);
         }
-        return self::$instanse[$table];
+        return self::$instanse[static::$table];
     }
 }

@@ -10,11 +10,18 @@ use Julibo\Msfoole\Helper;
 class Order extends BaseModel
 {
 
+    public static $table = 'bx_orders';
+
     protected function init()
     {
 
     }
 
+    /**
+     * 生成订单ID
+     * @param $cardno
+     * @return string
+     */
     private function getOrderID($cardno)
     {
         $cardno = substr($cardno, -5);
@@ -59,5 +66,40 @@ class Order extends BaseModel
         } else {
             return false;
         }
+    }
+
+    /**
+     * 根据单号查询订单
+     * @param $out_trade_no
+     * @return array|\PDOStatement|string|\think\Model|null
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getOrderByTradeNo($out_trade_no)
+    {
+        $result = $this->db
+            ->where('out_trade_no', $out_trade_no)
+            ->find();
+        return $result;
+    }
+
+    /**
+     * 更新订单状态
+     * @param $id
+     * @param int $status
+     * @return int|string
+     * @throws \think\Exception
+     * @throws \think\db\exception\PDOException
+     */
+    public function updateOrderStatus($id, $status = 1)
+    {
+        $result = $this->db
+            ->where('id', $id)
+            ->update([
+                'id' => $id,
+                'status'  => $status
+            ]);
+        return $result;
     }
 }

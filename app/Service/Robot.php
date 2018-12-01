@@ -9,6 +9,7 @@ use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
 use Julibo\Msfoole\Facade\Config;
 use App\Model\Order as OrderModel;
+use Julibo\Msfoole\Facade\Log;
 
 class Robot extends BaseServer
 {
@@ -143,7 +144,7 @@ class Robot extends BaseServer
         if (empty($cardno) || empty($ysbh) || empty($bb) || empty($zfje) || empty($zfzl)) {
             throw new \Exception('缺少必要的参数', 200);
         }
-        $orderData = OrderModel::getInstance('bx_orders')->createRegOrder($cardno, $ysbh, $bb, $zfje, $zfzl);
+        $orderData = OrderModel::getInstance()->createRegOrder($cardno, $ysbh, $bb, $zfje, $zfzl);
         if ($orderData == false) {
             throw new \Exception('订单创建失败', 210);
         }
@@ -164,9 +165,14 @@ class Robot extends BaseServer
         return $result;
     }
 
-    public function callbackWFT($params)
+    /**
+     * 支付回调
+     * @param $xml
+     * @return string
+     */
+    public function callbackWFT($xml)
     {
-        var_dump($params);
+        return PaymentApi::getInstance()->callback($xml);
     }
 
 
