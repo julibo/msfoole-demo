@@ -35,14 +35,14 @@ abstract class BaseModel
      */
     private function __construct($table, $config = [])
     {
-        if (empty($config)) {
-            $config = [
-                'params' => [
-                    \PDO::ATTR_PERSISTENT   => true,
-                    \PDO::ATTR_CASE         => \PDO::CASE_LOWER,
-                ]
-            ];
-        }
+//        if (empty($config)) {
+//            $config = [
+//                'params' => [
+//                    \PDO::ATTR_PERSISTENT   => true,
+//                    \PDO::ATTR_CASE         => \PDO::CASE_LOWER,
+//                ]
+//            ];
+//        }
         $defaultConfig = Config::get('database.default');
         $config = array_merge($defaultConfig, $config);
         Db::setConfig($config);
@@ -62,9 +62,11 @@ abstract class BaseModel
      */
     public static function getInstance($config = [])
     {
-        if (empty(self::$instanse[static::$table])) {
-            self::$instanse[static::$table] = new static(static::$table, $config);
-        }
-        return self::$instanse[static::$table];
+//        if (empty(self::$instanse[static::$table])) {
+//            self::$instanse[static::$table] = new static(static::$table, $config);
+//        }
+//        return self::$instanse[static::$table];
+        return new static(static::$table, $config);
+
     }
 }

@@ -9,7 +9,9 @@ use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
 use Julibo\Msfoole\Facade\Config;
 use App\Model\Order as OrderModel;
+use App\Model\Bill as BillModel;
 use Julibo\Msfoole\Facade\Log;
+use Julibo\Msfoole\Helper;
 
 class Robot extends BaseServer
 {
@@ -123,7 +125,7 @@ class Robot extends BaseServer
 //        if (!empty($response) && !empty($response['item'])) {
 //            $result = $response['item'];
 //        }
-        $result = json_decode('[{"ghs":"50","photoUrl":"http:\/\/cdfzyz.xicp.net:38700\/zykc\/image\/1.jpg","xm":"系统用户1","bb":"2","ysjs":"ttttttttttyuyturtyur","ysbh":"1","syhs":"60","lbmc":"主任医师","ghlb":"1","ghfy":"11","bbmc":"上午班"},{"ghs":"50","photoUrl":"http:\/\/cdfzyz.xicp.net:38700\/zykc\/image\/1.jpgimage\/2.jpg","xm":"高智三","bb":"1","ysjs":"医生技术哦","ysbh":"2","syhs":"60","lbmc":"主任医师","ghlb":"1","bbmc":"全班"},{"ghs":"50","photoUrl":"http:\/\/cdfzyz.xicp.net:38700\/zykc\/image\/1.jpgimage\/2.jpgimage\/35.jpg","xm":"陈永朴","bb":"1","ysjs":"","ysbh":"35","syhs":"60","lbmc":"主任医师","ghlb":"1","bbmc":"全班"}]');
+        $result = json_decode('[{"ghs":"50","photoUrl":"http:\/\/cdfzyz.xicp.net:38700\/zykc\/image\/1.jpg","xm":"系统用户1","bb":"2","ysjs":"ttttttttttyuyturtyur","ysbh":"1","syhs":"60","lbmc":"主任医师","ghlb":"1","ghfy":"11","bbmc":"上午班"},{"ghs":"50","photoUrl":"http:\/\/cdfzyz.xicp.net:38700\/zykc\/image\/1.jpgimage\/2.jpg","xm":"高智三","bb":"1","ysjs":"医生技术哦","ysbh":"2","syhs":"60","lbmc":"主任医师","ghlb":"1","ghfy":"0.01","bbmc":"全班"},{"ghs":"50","photoUrl":"http:\/\/cdfzyz.xicp.net:38700\/zykc\/image\/1.jpgimage\/2.jpgimage\/35.jpg","xm":"陈永朴","bb":"1","ysjs":"","ysbh":"35","syhs":"60","lbmc":"主任医师","ghlb":"1","ghfy":"0.02","bbmc":"全班"}]');
         return $result;
     }
 
