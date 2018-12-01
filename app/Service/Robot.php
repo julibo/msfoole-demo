@@ -154,7 +154,6 @@ class Robot extends BaseServer
             case 1:
                 break;
             case 2:
-                $orderData['total_fee']= 1;
                 $orderData['mch_create_ip'] = '114.215.190.171';
                 $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
                 $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
@@ -174,6 +173,7 @@ class Robot extends BaseServer
      */
     public function callbackWFT($xml)
     {
+        Log::error($xml);
         return PaymentApi::getInstance()->callback($xml);
     }
 

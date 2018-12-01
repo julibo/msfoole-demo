@@ -97,7 +97,6 @@ class Order extends BaseModel
         $result = $this->db
             ->where('id', $id)
             ->update([
-                'id' => $id,
                 'status'  => $status
             ]);
         return $result;
