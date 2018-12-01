@@ -56,7 +56,7 @@ class Order extends BaseModel
             'body' => '挂号费',
             'total_fee' => $zfje * 100,
             'time_start' => date('Y-m-d H:i:s'),
-            'time_expire' => date('Y-m-d H:i:s', strtotime('2 minute')),
+            'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,
         ];
 
