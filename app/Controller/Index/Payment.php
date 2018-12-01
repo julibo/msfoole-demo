@@ -22,6 +22,7 @@ class Payment extends BaseController
     public function callbackWFT()
     {
         $input = $this->request->input;
+        print_r($this->request);
         $result = RobotServer::getInstance()->callbackWFT($input);
         echo $result;
     }
