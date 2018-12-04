@@ -85,9 +85,10 @@ class Order extends BaseModel
     }
 
     /**
-     * 更新订单状态
+     * 更新订单状态及操作码
      * @param $id
      * @param int $status
+     * @param int $code
      * @return int|string
      * @throws \think\Exception
      * @throws \think\db\exception\PDOException

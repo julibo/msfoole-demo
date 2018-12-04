@@ -25,8 +25,8 @@ class Robot extends BaseController
      */
     public function getTodayRegister()
     {
-        $cardno = $this->user->cardno;
-        $result = RobotServer::getInstance()->getTodayRegister($cardno);
+        $cardNo = $this->user->cardno;
+        $result = RobotServer::getInstance()->getTodayRegister($cardNo);
         return $result;
     }
 
@@ -35,9 +35,9 @@ class Robot extends BaseController
      */
     public function cancelReg()
     {
-        $cardno = $this->user->cardno;
+        $cardNo = $this->user->cardno;
         $mzh = $this->params['mzh'] ?? null;
-        $result = RobotServer::getInstance()->cancelReg($cardno, $mzh);
+        $result = RobotServer::getInstance()->cancelReg($cardNo, $mzh);
         return $result;
     }
 
@@ -65,13 +65,12 @@ class Robot extends BaseController
      */
     public function createOrder()
     {
-        $cardno = $this->user->cardno;
+        $cardNo = $this->user->cardno;
         $ysbh = $this->params['ysbh'] ?? null;
         $bb = $this->params['bb'] ?? null;
         $zfje = $this->params['zfje'] ?? null;
         $zfzl = $this->params['zfzl'] ?? null;
-        $result = RobotServer::getInstance()->createOrder($cardno, $ysbh, $bb, $zfje, $zfzl);
+        $result = RobotServer::getInstance()->createOrder($cardNo, $ysbh, $bb, $zfje, $zfzl);
         return $result;
     }
-
 }

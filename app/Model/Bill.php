@@ -2,9 +2,7 @@
 /**
  * 对账单
  */
-
 namespace App\Model;
-
 
 class Bill extends BaseModel
 {
@@ -12,9 +10,7 @@ class Bill extends BaseModel
     public static $table = 'bx_bill';
 
     protected function init()
-    {
-
-    }
+    {}
 
     /**
      * 添加交易记录

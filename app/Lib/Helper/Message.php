@@ -5,12 +5,11 @@
 
 namespace App\Lib\Helper;
 
+use Julibo\Msfoole\Facade\Config;
+
 class Message
 {
-    const WEBHOOK = 'https://oapi.dingtalk.com/robot/send?access_token=84fe66b00d96a4492df3da0c3f8f49735c2b505c17c68f4f97cf77a73fda8336';
-
-    const SMSKEY = 'b583e0692cd9dbc586ef';
-    const SMSUSER = 'zgsof';
+    const WEBHOOK = 'https://oapi.dingtalk.com/robot/send?access_token=';
 
     public static function request_by_curl($remote_server, $post_string) {
         $ch = curl_init();
@@ -34,7 +33,7 @@ class Message
         $result = false;
         $data = array ('msgtype' => 'text','text' => array ('content' => $message));
         $data_string = json_encode($data);
-        $apiData = self::request_by_curl(self::WEBHOOK, $data_string);
+        $apiData = self::request_by_curl(self::WEBHOOK . Config::get('extra.dd.hook'), $data_string);
         $apiData = json_decode($apiData);
         if (!empty($apiData) && isset($apiData->errcode) && $apiData->err == 0) {
             $result = true;
@@ -64,7 +63,7 @@ class Message
     public static function sendSms($mobile, $txt)
     {
         $url = sprintf("http://utf8.api.smschinese.cn/?Uid=%s&Key=%s&smsMob=%s&smsText=%s",
-            self::SMSUSER, self::SMSKEY, $mobile, $txt );
+            Config::get('extra.sms.user'), Config::get('extra.sms.key'), $mobile, $txt );
         $result = self::Get($url);
         return $result;
     }

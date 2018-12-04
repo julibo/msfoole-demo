@@ -3,7 +3,7 @@ namespace App\Controller;
 
 use Julibo\Msfoole\HttpController as BaseController;
 
-class Index extends BaseController
+class Health extends BaseController
 {
     protected function init()
     {
@@ -14,5 +14,4 @@ class Index extends BaseController
     {
         return 'hello world!';
     }
-
 }
