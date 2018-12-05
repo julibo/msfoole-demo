@@ -5,7 +5,6 @@
 
 namespace App\Validator;
 
-
 class Feedback
 {
     public static $Exception = [

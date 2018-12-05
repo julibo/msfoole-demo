@@ -5,14 +5,13 @@
 
 namespace App\Service;
 
-use App\Logic\HospitalApi;
-use App\Logic\PaymentApi;
-use App\Model\Order;
 use Julibo\Msfoole\Facade\Config;
-use App\Model\Order as OrderModel;
-use App\Model\Bill as BillModel;
 use Julibo\Msfoole\Facade\Log;
 use Julibo\Msfoole\Helper;
+use Julibo\Msfoole\Channel;
+use App\Logic\HospitalApi;
+use App\Logic\PaymentApi;
+use App\Model\Order as OrderModel;
 
 class Robot extends BaseServer
 {
@@ -20,7 +19,6 @@ class Robot extends BaseServer
     protected function init()
     {
         // TODO: Implement init() method.
-
     }
 
     /**
@@ -64,19 +62,15 @@ class Robot extends BaseServer
      */
     public function getTodayRegister(string $cardno)
     {
-//         $result = [];
-//         $response = HospitalApi::getInstance()->apiClient('ghxx', ['kh'=>$cardno]);
-//         if (!empty($response) && !empty($response['item'])) {
-//             foreach ($response['item'] as $vo) {
-//                 if ($vo['yfsfy'] == "False")
-//                     array_push($result, $vo);
-//             }
-//         }
-//         return $result;
-        $response = '{"item":[{"mzh":"1807240010","yfsfy":"False","hj":"11","ysxm":"系统用户1","ysbm":"1","ydzf":"5.00","ghrq":"2018-11-25 12:28:02","ghlb":"主任医师","dabh":"15928089191","byxm":"杨刚"},{"mzh":"1807240012","yfsfy":"False","hj":"11","ysxm":"孙中军","ysbm":"3","ydzf":"3.00","ghrq":"2018-11-25 12:28:02","ghlb":"主任医师","dabh":"15928089191","byxm":"杨刚"}],"count":"2"}';
-        $response = json_decode($response, true);
-        $result = $response['item'];
-        return $result;
+         $result = [];
+         $response = HospitalApi::getInstance()->apiClient('ghxx', ['kh'=>$cardno]);
+         if (!empty($response) && !empty($response['item'])) {
+             foreach ($response['item'] as $vo) {
+                 if ($vo['yfsfy'] == "False")
+                     array_push($result, $vo);
+             }
+         }
+         return $result;
     }
 
     /**
@@ -118,12 +112,10 @@ class Robot extends BaseServer
     public function getDepartment() : array
     {
         $result = [];
-//        $response = HospitalApi::getInstance()->apiClient('ksxx');
-//        var_dump($response);
-//        if (!empty($response) && !empty($response['item'])) {
-//            $result = $response['item'];
-//        }
-        $result = json_decode('[{"ksbm":"1","ksmc":"内科","kswz":"一楼"},{"ksbm":"2","ksmc":"外科","kswz":"一楼"},{"ksbm":"3","ksmc":"急诊科","kswz":"一楼"}]');
+        $response = HospitalApi::getInstance()->apiClient('ksxx');
+        if (!empty($response) && !empty($response['item'])) {
+            $result = $response['item'];
+        }
         return $result;
     }
 
@@ -161,7 +153,6 @@ class Robot extends BaseServer
      */
     public function createOrder($cardno, $ysbh, $bb, $zfje, $zfzl)
     {
-        $result = false;
         if (empty($cardno) || empty($ysbh) || empty($bb) || empty($zfje) || empty($zfzl)) {
             throw new \Exception('缺少必要的参数', 200);
         }
@@ -169,19 +160,11 @@ class Robot extends BaseServer
         if ($orderData == false) {
             throw new \Exception('订单创建失败', 210);
         }
-        switch ($zfzl) {
-            case 1:
-                break;
-            case 2:
-                $orderData['mch_create_ip'] = '114.215.190.171';
-                $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
-                $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
-                $weixinResult = PaymentApi::getInstance()->createOrder($orderData);
-                $result = $weixinResult['code_img_url'];
-                break;
-            case 3:
-                break;
-        }
+        $orderData['mch_create_ip'] = '114.215.190.171';
+        $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
+        $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
+        $weixinResult = PaymentApi::getInstance()->createOrder($orderData, $zfzl);
+        $result = $weixinResult['code_img_url'];
         return $result;
     }
 

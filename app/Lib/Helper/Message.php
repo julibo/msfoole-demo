@@ -55,7 +55,7 @@ class Message
     }
 
     /**
-     * http://www.smschinese.cn#zgsof#nana102030
+     * http://www.smschinese.cn
      * @param $mobile
      * @param $txt
      * @return mixed

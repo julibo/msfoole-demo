@@ -1,6 +1,6 @@
 <?php
 /**
- * 第三方回调
+ * 第三方支付回调
  */
 
 namespace App\Controller\Index;

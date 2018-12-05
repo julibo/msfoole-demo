@@ -45,7 +45,7 @@ class HospitalApi
      * @return mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function apiClient($code, $content = "")
+    public function apiClient($code, $content = "") :array
     {
         $this->client = new Client(['cookies' => false]);
         $body = [
@@ -74,18 +74,15 @@ class HospitalApi
 
     /**
      * 通过卡号查询用户信息
-     * @param string $cardno
+     * @param string $cardNo
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getUser(string $cardno) : array
+    public function getUser(string $cardNo) : array
     {
-//        $response = $this->apiClient('byxx', ['kh'=>$cardno]);
-//        $result = $response['item'];
-//        $result['cardno'] = $cardno;
-//        return $result;
-        return json_decode('{"xm":"刘青洋","xb":"男","mz":"汉族","dabh":"00000005","csrq":"1982-04-05","cardno":"00000005"}', true);
+        $response = $this->apiClient('byxx', ['kh'=>$cardNo]);
+        $result = $response['item'];
+        $result['cardno'] = $cardNo;
+        return $result;
     }
-
-
 }
