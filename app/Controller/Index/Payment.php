@@ -6,7 +6,6 @@
 namespace App\Controller\Index;
 
 use Julibo\Msfoole\HttpController as BaseController;
-
 use App\Service\Robot as RobotServer;
 
 class Payment extends BaseController

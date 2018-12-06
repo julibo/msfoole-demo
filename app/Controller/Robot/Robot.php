@@ -61,16 +61,18 @@ class Robot extends BaseController
     }
 
     /**
-     * 创建订单
+     * 创建挂号订单
      */
-    public function createOrder()
+    public function createRegOrder()
     {
         $cardNo = $this->user->cardno;
+        $ip = $this->user->ip ?? '127.0.0.1';
         $ysbh = $this->params['ysbh'] ?? null;
         $bb = $this->params['bb'] ?? null;
         $zfje = $this->params['zfje'] ?? null;
         $zfzl = $this->params['zfzl'] ?? null;
-        $result = RobotServer::getInstance()->createOrder($cardNo, $ysbh, $bb, $zfje, $zfzl);
+        $body = $this->params['body'] ?? '挂号费';
+        $result = RobotServer::getInstance()->createRegOrder($cardNo, $ysbh, $bb, $zfje, $zfzl, $body, $this->token, $ip);
         return $result;
     }
 }

@@ -83,6 +83,8 @@ class HospitalApi
         $response = $this->apiClient('byxx', ['kh'=>$cardNo]);
         $result = $response['item'];
         $result['cardno'] = $cardNo;
+        $result['mobile'] = '18140106050';
         return $result;
+        // return json_decode('{"xm":"刘青洋","xb":"男","mz":"汉族","dabh":"00000005","csrq":"1982-04-05","cardno":"00000005"}', true);
     }
 }

@@ -37,24 +37,30 @@ class Order extends BaseModel
      * @param $bb 班别
      * @param $zfje 金额
      * @param $zfzl 支付方式
-     * @param int $type
-     * @param int $source
+     * @param $body 订单描述
+     * @param $ip 客户端IP
+     * @param int $group 订单类型， 1=挂号，2=缴费
+     * @param int $type 接口， 1=威富通
+     * @param int $source 订单来源，1=终端机
+     * @param string $client 客户标识
      * @return array|bool
      */
-    public function createRegOrder($cardno, $ysbh, $bb, $zfje, $zfzl, $type = 1, $source = 1)
+    public function createRegOrder($cardno, $ysbh, $bb, $zfje, $zfzl, $body, $ip, $group = 1, $source = 1, $type = 1, $client = '')
     {
         $info = ['cardno' => $cardno, 'ysbh' => $ysbh, 'bb' => $bb, 'zfje' => $zfje, 'zfzl'=> $zfzl];
         $nonce_str = Helper::guid();
         $orderID = $this->getOrderID($cardno);
         $data = [
             'out_trade_no' => $orderID,
-            'group' => 1,
+            'group' => $group,
             'info' => json_encode($info),
             'type' => $type,
             'source' => $source,
+            'client' => $client,
             'method' => $zfzl,
-            'body' => '挂号费',
+            'body' => $body,
             'total_fee' => $zfje * 100,
+            'mch_create_ip' => $ip,
             'time_start' => date('Y-m-d H:i:s'),
             'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,

@@ -16,7 +16,7 @@ abstract class BaseServer
 
     public static function getInstance() :self
     {
-        if (!isset(self::$instance)) {
+        if (is_null(self::$instance)) {
             self::$instance = new static;
         }
         return self::$instance;
@@ -24,3 +24,4 @@ abstract class BaseServer
 
     abstract protected function init();
 }
+

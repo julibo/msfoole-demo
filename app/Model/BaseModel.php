@@ -10,11 +10,6 @@ use Julibo\Msfoole\Facade\Config;
 
 abstract class BaseModel
 {
-    /**
-     * 实例载体
-     * @var array
-     */
-    protected static $instanse = [];
 
     /**
      * 表名

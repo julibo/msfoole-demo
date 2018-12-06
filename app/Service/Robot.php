@@ -12,6 +12,7 @@ use Julibo\Msfoole\Channel;
 use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
 use App\Model\Order as OrderModel;
+use App\Lib\Helper\Message;
 
 class Robot extends BaseServer
 {
@@ -108,6 +109,8 @@ class Robot extends BaseServer
 
     /**
      * 获取医院科室列表
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getDepartment() : array
     {
@@ -127,12 +130,11 @@ class Robot extends BaseServer
      */
     public function getSourceList($ksbm = null) : array
     {
-        $result = [];
+//        $result = [];
 //        if (empty($ksbm)) {
 //            throw new \Exception('缺少必要的参数', 200);
 //        }
 //        $response = HospitalApi::getInstance()->apiClient('ysxx', ['ksbm'=>$ksbm]);
-//        var_dump($response);
 //        if (!empty($response) && !empty($response['item'])) {
 //            $result = $response['item'];
 //        }
@@ -141,22 +143,25 @@ class Robot extends BaseServer
     }
 
     /**
-     * 创建订单
+     * 创建挂号订单
      * 先去创建本地订单，再来获得支付二维码
-     * @param $cardno
-     * @param $ysbh
-     * @param $bb
-     * @param $zfje
-     * @param $zfzl
+     * @param $cardno 卡号
+     * @param $ysbh 医生编号
+     * @param $bb 班次
+     * @param $zfje 挂号费
+     * @param $zfzl 支付方式
+     * @param $body 订单描述
+     * @param $token 用户标识
+     * @param $ip 用户IP
+     * @return mixed
      * @throws \Exception
-     * @return array|void
      */
-    public function createOrder($cardno, $ysbh, $bb, $zfje, $zfzl)
+    public function createRegOrder($cardno, $ysbh, $bb, $zfje, $zfzl, $body, $token, $ip)
     {
         if (empty($cardno) || empty($ysbh) || empty($bb) || empty($zfje) || empty($zfzl)) {
             throw new \Exception('缺少必要的参数', 200);
         }
-        $orderData = OrderModel::getInstance()->createRegOrder($cardno, $ysbh, $bb, $zfje, $zfzl);
+        $orderData = OrderModel::getInstance()->createOrder($cardno, $ysbh, $bb, $zfje, $zfzl, $body, $ip, 1, 1, 1);
         if ($orderData == false) {
             throw new \Exception('订单创建失败', 210);
         }
@@ -172,35 +177,103 @@ class Robot extends BaseServer
      * 支付回调
      * @param $xml
      * @return string
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function callbackWFT($xml)
     {
-        return PaymentApi::getInstance()->callback($xml);
+        $payRes = PaymentApi::getInstance()->callback($xml);
+        if ($payRes) {
+            $order = OrderModel::getInstance()->getOrderByTradeNo($payRes['orderID']);
+            if ($order && $order['total_fee'] == $payRes['totalFee']) {
+                if ($order['status'] == 0) {
+                    // 更改订单状态
+                    $updateResult = OrderModel::getInstance()->updateOrderStatus($order['id'], 1);
+                    if ($updateResult) {
+                        switch ($order['group']) {
+                            case 1:// 挂号
+                                $info = json_decode($order['info'], true);
+                                $regResult = $this->register($info, $payRes['orderID'], $order['id']);
+                                if ($regResult) {
+                                    $notice = [
+                                        'type' => 1, // websocket广播
+                                        'client' => $order['client'],
+                                        'group' => 1,
+                                        'result' => 1,
+                                        'title' => '挂号费',
+                                        'amount' => '11.00',
+                                        'office' => '科室',
+                                        'doctor' => '杨爱国',
+                                        'mzh' => $regResult,
+                                    ];
+                                    Channel::instance()->push($notice);
+                                    $this->sendSms($info['cardno'], '挂号成功，请按时就诊');
+                                } else {
+                                    $notice = [
+                                        'group' => 1,
+                                        'result' => 0
+                                    ];
+                                    Channel::instance()->push($notice);
+                                    $this->sendSms($info['cardno'], '挂号失败，挂号费将按原路返回');
+                                }
+                            case 2:// 缴费
+                                break;
+                        }
+                        return 'success';
+                    }
+                } else {
+                    return 'success';
+                }
+            }
+        }
     }
 
     /**
-     * 挂号
+     * 预约挂号
+     * @param array $info
+     * @param string $orderNo
+     * @param int $orderID
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function register($data)
+    private function register(array $info, string $orderNo, int $orderID)
     {
-        $orderId = $data['out_trade_no'];
-        $info = json_decode($data['info'], true);
+        $result = false;
         $content = [
             "kh" => $info['cardno'],
             "ysbh" => $info['ysbh'],
             "bb" => $info['bb'],
-            "zfje" => $info['zfje'],
+            // "zfje" => $info['zfje'],
+            "zfje" => 11,
             "zfzl" => $info['zfzl'],
-            "sjh" => $orderId
+            "sjh" => $orderNo
         ];
+        Log::info('register:预约挂号发起--{message}', ['message' => json_encode($content)]);
         $response = HospitalApi::getInstance()->apiClient('ghdj', $content);
         if (!empty($response['item']['mzh'])) {
+            Log::info('register:预约挂号成功--{message}', ['message' => json_encode($content)]);
             // 更新订单
-            OrderModel::getInstance()->updateOrderStatus($data['id'], $response['item']['mzh'], 2);
-            // 发送短信
-            App\Lib\Helper\Message::sendSms('181410106050', '挂号成功，欢迎就诊！');
+            OrderModel::getInstance()->updateOrderStatus($orderID, 2, $response['item']['mzh']);
+            $result = $response['item']['mzh'];
+        } else {
+            Log::info('register:预约挂号失败--{message}', ['message' => json_encode($content)]);
         }
-        return 10000;
+        return $result;
+    }
+
+    /**
+     * 根据卡号发送短信
+     * @param string $cardNo
+     * @param string $content
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    private function sendSms(string $cardNo, string $content)
+    {
+        $user = HospitalApi::getInstance()->getUser($cardNo);
+        if (!empty($user) && !empty($content) && !empty($user['mobile']) && preg_match("/^1[3456789]\d{9}$/", $user['mobile'])) {
+            Log::info('sendSMS:向{mobile}发送短信：{message}', ['mobile' => $user['mobile'], 'message' => $content]);
+            Message::sendSms($user['mobile'], $content);
+        }
     }
 
 }
+

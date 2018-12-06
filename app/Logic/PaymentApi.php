@@ -26,9 +26,9 @@ class PaymentApi
         $this->Request();
     }
 
-    public static function getInstance() : self
+    public static function getInstance($force = true) : self
     {
-        if (is_null(self::$instance)) {
+        if (is_null(self::$instance) || $force) {
             self::$instance = new static;
         }
         return self::$instance;
@@ -63,8 +63,8 @@ class PaymentApi
                 case 1:
                     $this->reqHandler->setParameter('service','pay.alipay.native');
                     break;
-                    $this->reqHandler->setParameter('service','pay.weixin.native');
                 case 2:
+                    $this->reqHandler->setParameter('service','pay.weixin.native');
                     break;
             }
             $this->reqHandler->setParameter('mch_id',$this->cfg['mchid']); //必填项，商户号，由威富通分配
@@ -98,7 +98,7 @@ class PaymentApi
                 throw new \Exception($this->pay->getErrInfo(), $this->pay->getResponseCode());
             }
         } catch (\Exception $e) {
-            Log::error('二维码创建失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
+            Log::error('PayCode:二维码创建失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
         }
     }
 
@@ -106,39 +106,15 @@ class PaymentApi
     {
         $this->resHandler->setContent($xml);
         $this->resHandler->setKey($this->cfg['key']);
+        // 日志记录
+        Log::info('PayCall:接口回调收到通知参数：{message}', ['message'=>json_encode($this->resHandler->getAllParameters())]);
         if($this->resHandler->isTenpaySign()) {
-            // 日志记录
-            Log::info('接口回调收到通知参数：{message}', ['message'=>json_encode($this->resHandler->getAllParameters())]);
             if($this->resHandler->getParameter('status') == 0 && $this->resHandler->getParameter('result_code') == 0) {
                 // 查询对应的订单
                 return [
                     'orderID' =>  $this->resHandler->getParameter('out_trade_no'),
                     'totalFee' => $this->resHandler->getParameter('total_fee')
                 ];
-//                $order = OrderModel::getInstance()->getOrderByTradeNo($orderID);
-//                if ($order && $order['total_fee'] == $totalFee) {
-//                    if ($order['status'] == 0) {
-//                        return true;
-//                        // 更改订单状态
-//                        $updateResult = OrderModel::getInstance()->updateOrderStatus($order['id'], 1);
-//                        if ($updateResult) {
-//                            switch ($order['source']) {
-//                                case 1:
-//                                    $data = [
-//                                        'namespace' => '\\App\\Service\\',
-//                                        'class' =>'Robot',
-//                                        'action' =>'register',
-//                                        'data' => $order
-//                                    ];
-//                                    Channel::instance()->push($data);
-//                                    break;
-//                            }
-//                            return 'success';
-//                        }
-//                    } else {
-//                        return 'success';
-//                    }
-//                }
             }else{
                 return false;
             }
@@ -179,7 +155,7 @@ class PaymentApi
                             'refund_channel'=>$this->resHandler->getParameter('refund_channel'),
                             'refund_fee'=>$this->resHandler->getParameter('refund_fee'),
                             'coupon_refund_fee'=>$this->resHandler->getParameter('coupon_refund_fee'));
-                        Log::info('提交退款成功：{message}', ['message'=>json_encode($res)]);
+                        Log::info('Refund:提交退款成功：{message}', ['message'=>json_encode($res)]);
                         return true;
                     }else{
                         throw new \Exception($this->resHandler->getParameter('err_msg'), $this->resHandler->getParameter('err_code'));
@@ -191,7 +167,7 @@ class PaymentApi
             }
 
         } catch (\Exception $e) {
-            Log::error('退款提交失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
+            Log::error('Refund:退款提交失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
             return false;
         }
     }
