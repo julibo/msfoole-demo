@@ -206,14 +206,30 @@ class Robot extends BaseServer
                                         'mzh' => $regResult,
                                     ];
                                     Channel::instance()->push($notice);
-                                    $this->sendSms($info['cardno'], '挂号成功，请按时就诊');
+                                    $sms = [
+                                        'type' => 2,
+                                        'class' => self::class,
+                                        'method' => 'sendSms',
+                                        'parameter' => ['cardno'=>$info['cardno'], 'content'=>'挂号成功，请按时就诊']
+                                    ];
+                                    Channel::instance()->push($sms);
+                                    // $this->sendSms($info['cardno'], '挂号成功，请按时就诊');
                                 } else {
                                     $notice = [
+                                        'type' => 1, // websocket广播
+                                        'client' => $order['client'],
                                         'group' => 1,
                                         'result' => 0
                                     ];
                                     Channel::instance()->push($notice);
-                                    $this->sendSms($info['cardno'], '挂号失败，挂号费将按原路返回');
+                                    $sms = [
+                                        'type' => 2,
+                                        'class' => static::class,
+                                        'method' => 'sendSms',
+                                        'parameter' => ['cardno'=>$info['cardno'], 'content'=>'挂号失败，挂号费将按原路返回']
+                                    ];
+                                    Channel::instance()->push($sms);
+                                    // $this->sendSms($info['cardno'], '挂号失败，挂号费将按原路返回');
                                 }
                             case 2:// 缴费
                                 break;
@@ -266,7 +282,7 @@ class Robot extends BaseServer
      * @param string $content
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function sendSms(string $cardNo, string $content)
+    public static function sendSms(string $cardNo, string $content)
     {
         $user = HospitalApi::getInstance()->getUser($cardNo);
         if (!empty($user) && !empty($content) && !empty($user['mobile']) && preg_match("/^1[3456789]\d{9}$/", $user['mobile'])) {
