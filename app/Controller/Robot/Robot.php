@@ -77,7 +77,7 @@ class Robot extends BaseController
     }
 
     /**
-     * 获取代缴费记录
+     * 获取待缴费记录
      */
     public function getPayment()
     {
@@ -93,12 +93,11 @@ class Robot extends BaseController
     {
         $cardNo = $this->user->cardno;
         $ip = $this->user->ip ?? '127.0.0.1';
-        $ysbh = $this->params['ysbh'] ?? null;
-        $bb = $this->params['bb'] ?? null;
+        $body = '门诊缴费';
+        $mzh = $this->params['mzh'] ?? null;
         $zfje = $this->params['zfje'] ?? null;
         $zfzl = $this->params['zfzl'] ?? null;
-        $body = '挂号费';
-        $result = RobotServer::getInstance()->createPayOrder($cardNo, $ysbh, $bb, $zfje, $zfzl, $body, $this->token, $ip);
+        $result = RobotServer::getInstance()->createPayOrder($cardNo, $mzh, $zfje, $zfzl, $body, $ip, $this->token);
         return $result;
     }
 

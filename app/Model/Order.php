@@ -125,4 +125,47 @@ class Order extends BaseModel
             ->find();
         return $result;
     }
+
+    /**
+     * 创建门诊缴费订单
+     * @param $cardno 卡号
+     * @param $mzh 门诊号
+     * @param $zfje 金额
+     * @param $zfzl 支付种类
+     * @param $body 描述
+     * @param $ip IP
+     * @param int $source 来源 1= 终端机
+     * @param int $type 支付平台 1= 威富通
+     * @param string $client 用户标识
+     * @return array|bool
+     */
+    public function createPayOrder($cardno, $mzh, $zfje, $zfzl, $body, $ip, $source = 1, $type = 1, $client = '')
+    {
+        $nonce_str = Helper::guid();
+        $orderID = $this->getOrderID($cardno);
+        $info = ['cardno' => $cardno, 'mzh' => $mzh, 'zfje' => $zfje, 'zfzl' => $zfzl, 'sjh' => $orderID];
+        $data = [
+            'out_trade_no' => $orderID,
+            'group' => 2,
+            'info' => json_encode($info),
+            'type' => $type,
+            'source' => $source,
+            'client' => $client,
+            'method' => $zfzl,
+            'body' => $body,
+            'total_fee' => $zfje * 100,
+            'mch_create_ip' => $ip,
+            'time_start' => date('Y-m-d H:i:s'),
+            'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
+            'nonce_str' => $nonce_str,
+        ];
+
+        $insertResult = $this->db->data($data)->insert();
+        if ($insertResult) {
+            return $data;
+        } else {
+            return false;
+        }
+    }
+
 }

@@ -176,6 +176,97 @@ class Robot extends BaseServer
     }
 
     /**
+     * 挂号单处理
+     * @param array $order
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    private function regOrderHandle(array $order)
+    {
+        $info = json_decode($order['info'], true);
+        $regResult = $this->register($info, $order['out_trade_no'], $order['id']);
+        if ($regResult) {
+            $notice = [
+                'type' => 1, // websocket广播
+                'client' => $order['client'],
+                'group' => 1,
+                'result' => 1,
+                'title' => '挂号费',
+                'amount' => '11.00',
+                'office' => '科室',
+                'doctor' => '杨爱国',
+                'mzh' => $regResult,
+            ];
+            Channel::instance()->push($notice);
+            $sms = [
+                'type' => 2,
+                'class' => self::class,
+                'method' => 'sendSms',
+                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'挂号成功，请按时就诊']
+            ];
+            Channel::instance()->push($sms);
+        } else {
+            $notice = [
+                'type' => 1, // websocket广播
+                'client' => $order['client'],
+                'group' => 1,
+                'result' => 0
+            ];
+            Channel::instance()->push($notice);
+            $sms = [
+                'type' => 2,
+                'class' => static::class,
+                'method' => 'sendSms',
+                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'挂号失败，挂号费将按原路返回']
+            ];
+            Channel::instance()->push($sms);
+        }
+    }
+
+    /**
+     * 门诊缴费处理
+     * @param array $order
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    private function payOrderHandle(array $order)
+    {
+        $info = json_decode($order['info'], true);
+        $payResult = $this->payment($info, $order['id']);
+        if ($payResult) {
+            $notice = [
+                'type' => 1, // websocket广播
+                'client' => $order['client'],
+                'group' => 2,
+                'result' => 1,
+                'title' => '门诊缴费',
+                'body' => $payResult,
+            ];
+            Channel::instance()->push($notice);
+            $sms = [
+                'type' => 2,
+                'class' => self::class,
+                'method' => 'sendSms',
+                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'缴费成功，欢迎惠顾']
+            ];
+            Channel::instance()->push($sms);
+        } else {
+            $notice = [
+                'type' => 1, // websocket广播
+                'client' => $order['client'],
+                'group' => 2,
+                'result' => 0
+            ];
+            Channel::instance()->push($notice);
+            $sms = [
+                'type' => 2,
+                'class' => static::class,
+                'method' => 'sendSms',
+                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'缴费失败，该款项将按原路返回']
+            ];
+            Channel::instance()->push($sms);
+        }
+    }
+
+    /**
      * 支付回调
      * @param $xml
      * @return string
@@ -193,45 +284,10 @@ class Robot extends BaseServer
                     if ($updateResult) {
                         switch ($order['group']) {
                             case 1:// 挂号
-                                $info = json_decode($order['info'], true);
-                                $regResult = $this->register($info, $payRes['orderID'], $order['id']);
-                                if ($regResult) {
-                                    $notice = [
-                                        'type' => 1, // websocket广播
-                                        'client' => $order['client'],
-                                        'group' => 1,
-                                        'result' => 1,
-                                        'title' => '挂号费',
-                                        'amount' => '11.00',
-                                        'office' => '科室',
-                                        'doctor' => '杨爱国',
-                                        'mzh' => $regResult,
-                                    ];
-                                    Channel::instance()->push($notice);
-                                    $sms = [
-                                        'type' => 2,
-                                        'class' => self::class,
-                                        'method' => 'sendSms',
-                                        'parameter' => ['cardno'=>$info['cardno'], 'content'=>'挂号成功，请按时就诊']
-                                    ];
-                                    Channel::instance()->push($sms);
-                                } else {
-                                    $notice = [
-                                        'type' => 1, // websocket广播
-                                        'client' => $order['client'],
-                                        'group' => 1,
-                                        'result' => 0
-                                    ];
-                                    Channel::instance()->push($notice);
-                                    $sms = [
-                                        'type' => 2,
-                                        'class' => static::class,
-                                        'method' => 'sendSms',
-                                        'parameter' => ['cardno'=>$info['cardno'], 'content'=>'挂号失败，挂号费将按原路返回']
-                                    ];
-                                    Channel::instance()->push($sms);
-                                }
+                                $this->regOrderHandle($order);
+                                break;
                             case 2:// 缴费
+                                $this->payOrderHandle($order);
                                 break;
                         }
                         return 'success';
@@ -276,6 +332,35 @@ class Robot extends BaseServer
     }
 
     /**
+     * 门诊缴费
+     * @param array $info
+     * @param int $orderID
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    private function payment(array $info, int $orderID)
+    {
+        $result = false;
+        $content = [
+            "mzh" => $info['mzh'],
+            "zfje" => $info['zfje'],
+            "zfzl" => $info['zfzl'],
+            "sjh" => $info['sjh']
+        ];
+        Log::info('register:门诊缴费发起--{message}', ['message' => json_encode($content)]);
+        $response = HospitalApi::getInstance()->apiClient('mzsf', $content);
+        if (!empty($response) && !empty($response['item'])) {
+            Log::info('register:门诊缴费成功--{message},返回记录--{response}', ['message' => json_encode($content), 'response'=>json_encode($response)]);
+            OrderModel::getInstance()->updateOrderStatus($orderID, 2, $response['item']['skbs']);
+            $result = $response['item'];
+        } else {
+            Log::info('register:门诊缴费失败--{message},返回记录--{response}', ['message' => json_encode($content), 'response'=>json_encode($response)]);
+            OrderModel::getInstance()->updateOrderStatus($orderID, 3);
+        }
+        return $result;
+    }
+
+    /**
      * 根据卡号发送短信
      * @param string $cardNo
      * @param string $content
@@ -288,6 +373,51 @@ class Robot extends BaseServer
             Log::info('sendSMS:向{mobile}发送短信：{message}', ['mobile' => $user['mobile'], 'message' => $content]);
             Message::sendSms($user['mobile'], $content);
         }
+    }
+
+    /**
+     * 通过卡号查询缴费列表
+     * @param string $cardNo
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function getPayment(string $cardNo)
+    {
+        $result = [];
+        $response = HospitalApi::getInstance()->apiClient('getjfmx', ['kh'=>$cardNo]);
+        if (!empty($response) && !empty($response['item'])) {
+            $result = $response['item'];
+        }
+        return $result;
+    }
+
+    /**
+     * 创建门诊缴费订单
+     * @param $cardNo 卡号
+     * @param $mzh 门诊号
+     * @param $zfje 支付金额
+     * @param $zfzl 支付种类
+     * @param $body 描述
+     * @param $ip IP地址
+     * @param $token 客户标识
+     * @return mixed
+     * @throws \Exception
+     */
+    public function createPayOrder($cardNo, $mzh, $zfje, $zfzl, $body, $ip, $token)
+    {
+        if (empty($cardNo) || empty($mzh) || empty($zfje) || empty($zfzl) || empty($body) || empty($ip) || empty($token)) {
+            throw new \Exception('缺少必要的参数', 200);
+        }
+        $orderData = OrderModel::getInstance()->createPayOrder($cardNo, $mzh, $zfje, $zfzl, $body, $ip, 1, 1, $token);
+        if ($orderData == false) {
+            throw new \Exception('订单创建失败', 210);
+        }
+        $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
+        $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
+        $payResult = PaymentApi::getInstance()->createOrder($orderData, $zfzl);
+        var_dump($payResult);
+        $result = $payResult['code_img_url'];
+        return $result;
     }
 
 }

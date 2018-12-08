@@ -59,11 +59,12 @@ class HospitalApi
             'content' => $content
         ];
         $body = json_encode($body);
+        Log::info('HospitalApi:发起请求，入参：{body}', ['body'=>$body]);
         $response = $this->client->request('POST', $this->apiHost, [
             'body' => $body
         ]);
         $data = $response->getBody();
-        Log::info('HospitalApi:入参：{body}，接口返回：{data}', ['body'=>$body, 'data'=>$data]);
+        Log::info('HospitalApi:获取结果，入参：{body}，接口返回：{data}', ['body'=>$body, 'data'=>$data]);
         $data = json_decode($data, true);
         if (empty($data) || !isset($data['errorcode']) || !isset($data['response'])) {
             throw new \Exception(Feedback::$Exception['INTERFACE_EXCEPTION_API']['msg'], Feedback::$Exception['INTERFACE_EXCEPTION_API']['code']);
@@ -88,5 +89,6 @@ class HospitalApi
         $result['cardno'] = $cardNo;
         $result['mobile'] = '18140106050';
         return $result;
+        // return json_decode('{"mobile":"18140106050","xm":"刘青洋","xb":"男","mz":"汉族","dabh":"00000005","csrq":"1982-04-05","cardno":"00000005"}', true);
     }
 }
