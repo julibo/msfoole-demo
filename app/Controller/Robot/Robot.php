@@ -106,6 +106,11 @@ class Robot extends BaseController
      */
     public function cancelPay()
     {
-
+        $cardNo = $this->user->cardno;
+        $orderID = $this->params['sjh'] ?? null;
+        $skbs = $this->params['skbs'] ?? null;
+        $zfje = $this->params['zfje'] ?? null;
+        $result = RobotServer::getInstance()->cancelPay($cardNo, $orderID, $skbs, $zfje);
+        return $result;
     }
 }

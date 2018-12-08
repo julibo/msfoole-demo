@@ -52,6 +52,7 @@ class Order extends BaseModel
         $orderID = $this->getOrderID($cardno);
         $data = [
             'out_trade_no' => $orderID,
+            'user' => $cardno,
             'group' => $group,
             'info' => json_encode($info),
             'type' => $type,
@@ -146,6 +147,7 @@ class Order extends BaseModel
         $info = ['cardno' => $cardno, 'mzh' => $mzh, 'zfje' => $zfje, 'zfzl' => $zfzl, 'sjh' => $orderID];
         $data = [
             'out_trade_no' => $orderID,
+            'user' => $cardno,
             'group' => 2,
             'info' => json_encode($info),
             'type' => $type,
