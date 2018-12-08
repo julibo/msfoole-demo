@@ -7,6 +7,7 @@ namespace App\Logic;
 
 use GuzzleHttp\Client;
 use Julibo\Msfoole\Facade\Config;
+use Julibo\Msfoole\Facade\Log;
 use App\Validator\Feedback;
 
 class HospitalApi
@@ -57,10 +58,12 @@ class HospitalApi
             ],
             'content' => $content
         ];
+        $body = json_encode($body);
         $response = $this->client->request('POST', $this->apiHost, [
-            'body' => json_encode($body)
+            'body' => $body
         ]);
         $data = $response->getBody();
+        Log::info('HospitalApi:入参：{body}，接口返回：{data}', ['body'=>$body, 'data'=>$data]);
         $data = json_decode($data, true);
         if (empty($data) || !isset($data['errorcode']) || !isset($data['response'])) {
             throw new \Exception(Feedback::$Exception['INTERFACE_EXCEPTION_API']['msg'], Feedback::$Exception['INTERFACE_EXCEPTION_API']['code']);

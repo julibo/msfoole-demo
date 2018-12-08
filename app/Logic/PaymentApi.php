@@ -134,9 +134,9 @@ class PaymentApi
             }
             $this->reqHandler->setParameter('version',$this->cfg['version']);
             $this->reqHandler->setParameter('service','unified.trade.refund');//接口类型：unified.trade.refund
-            $this->reqHandler->setParameter('mch_id',$this->cfg['mchId']);//必填项，商户号，由威富通分配
+            $this->reqHandler->setParameter('mch_id',$this->cfg['mchid']);//必填项，商户号，由威富通分配
             $this->reqHandler->setParameter('nonce_str', $params['nonce_str']);//随机字符串，必填项，不长于 32 位
-            $this->reqHandler->setParameter('op_user_id',$this->cfg['mchId']);//必填项，操作员帐号,默认为商户号
+            $this->reqHandler->setParameter('op_user_id',$this->cfg['mchid']);//必填项，操作员帐号,默认为商户号
             $this->reqHandler->setParameter('sign_type',$this->cfg['sign_type']);
 
             $this->reqHandler->createSign();//创建签名

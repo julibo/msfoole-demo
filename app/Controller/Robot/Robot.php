@@ -71,8 +71,42 @@ class Robot extends BaseController
         $bb = $this->params['bb'] ?? null;
         $zfje = $this->params['zfje'] ?? null;
         $zfzl = $this->params['zfzl'] ?? null;
-        $body = $this->params['body'] ?? '挂号费';
+        $body = '挂号费';
         $result = RobotServer::getInstance()->createRegOrder($cardNo, $ysbh, $bb, $zfje, $zfzl, $body, $this->token, $ip);
         return $result;
+    }
+
+    /**
+     * 获取代缴费记录
+     */
+    public function getPayment()
+    {
+        $cardNo = $this->user->cardno;
+        $result = RobotServer::getInstance()->getPayment($cardNo);
+        return $result;
+    }
+
+    /**
+     * 创建门诊缴费订单
+     */
+    public function createPayOrder()
+    {
+        $cardNo = $this->user->cardno;
+        $ip = $this->user->ip ?? '127.0.0.1';
+        $ysbh = $this->params['ysbh'] ?? null;
+        $bb = $this->params['bb'] ?? null;
+        $zfje = $this->params['zfje'] ?? null;
+        $zfzl = $this->params['zfzl'] ?? null;
+        $body = '挂号费';
+        $result = RobotServer::getInstance()->createPayOrder($cardNo, $ysbh, $bb, $zfje, $zfzl, $body, $this->token, $ip);
+        return $result;
+    }
+
+    /**
+     * 取消门诊缴费
+     */
+    public function cancelPay()
+    {
+
     }
 }
