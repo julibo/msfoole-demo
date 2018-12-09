@@ -191,9 +191,7 @@ class Robot extends BaseServer
                 'group' => 1,
                 'result' => 1,
                 'title' => '挂号费',
-                'amount' => '11.00',
-                'office' => '科室',
-                'doctor' => '杨爱国',
+                'body' => [['title' => '挂号费', 'cost' => $info['zfje']]],
                 'mzh' => $regResult,
             ];
             Channel::instance()->push($notice);
@@ -238,7 +236,7 @@ class Robot extends BaseServer
                 'group' => 2,
                 'result' => 1,
                 'title' => '门诊缴费',
-                'body' => $payResult,
+                'body' => [['title' => '门诊缴费', 'cost' => $info['zfje']]],
             ];
             Channel::instance()->push($notice);
             $sms = [
@@ -415,7 +413,6 @@ class Robot extends BaseServer
         $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
         $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
         $payResult = PaymentApi::getInstance()->createOrder($orderData, $zfzl);
-        var_dump($payResult);
         $result = $payResult['code_img_url'];
         return $result;
     }
