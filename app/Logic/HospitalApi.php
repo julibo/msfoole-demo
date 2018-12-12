@@ -46,7 +46,7 @@ class HospitalApi
      * @return mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function apiClient($code, $content = "") :array
+    public function apiClient($code, $content = "") : array
     {
         $this->client = new Client(['cookies' => false]);
         $body = [
@@ -72,7 +72,7 @@ class HospitalApi
         if ($data['errorcode'] != 0) {
             throw new \Exception($data['msg'], $data['errorcode']);
         }
-        $result = $data['response'];
+        $result = $data['response'] ?: [];
         return $result;
     }
 

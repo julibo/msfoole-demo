@@ -428,32 +428,36 @@ class Robot extends BaseServer
      */
     public function cancelPay(string $cardNo, string $orderID, string $skbs, float $zfje)
     {
-        if (empty($cardNo) || empty($orderID) || empty($skbs) || empty($zfje)) {
-            throw new \Exception('缺少必要的参数', 200);
+        try {
+            if (empty($cardNo) || empty($orderID) || empty($skbs) || empty($zfje)) {
+                throw new \Exception('缺少必要的参数', 200);
+            }
+            # 取得订单
+            $orderResult = OrderModel::getInstance()->getOrderByTradeNo($orderID);
+            if (empty($orderResult) || $orderResult['user'] != $cardNo || $orderResult['total_fee'] != $zfje * 100 ||
+                $orderResult['code'] != $skbs) {
+                throw new \Exception('订单不存在或无权操作', 210);
+            }
+            HospitalApi::getInstance()->apiClient('qxmzsf', ['skbs'=>$skbs, 'zfje' => $zfje]);
+            $params = [
+                'out_trade_no' => $orderID,
+                'out_refund_no' => $orderID . 'R',
+                'total_fee' => $orderResult['total_fee'],
+                'refund_fee' => $orderResult['total_fee'],
+                'refund_channel' => 'ORIGINAL',
+                'nonce_str' => Helper::guid()
+            ];
+            $refundResult = PaymentApi::getInstance()->submitRefund($params);
+            if ($refundResult) {
+                OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 5);
+            } else {
+                OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 4);
+                throw new \Exception('快速退款失败，将转由人工处理', 220);
+            }
+            return true;
+        } catch (\Exception $e) {
+            var_dump($e->getFile(), $e->getLine(), $e->getMessage());
         }
-        # 取得订单
-        $orderResult = OrderModel::getInstance()->getOrderByTradeNo($orderID);
-        if (empty($orderResult) || $orderResult['user'] != $cardNo || $orderResult['total_fee'] != $zfje * 100 ||
-            $orderResult['code'] != $skbs) {
-            throw new \Exception('订单不存在或无权操作', 210);
-        }
-        HospitalApi::getInstance()->apiClient('qxmzsf', ['skbs'=>$skbs, 'zfje' => $zfje]);
-        $params = [
-            'out_trade_no' => $orderID,
-            'out_refund_no' => $orderID . 'R',
-            'total_fee' => $orderResult['total_fee'],
-            'refund_fee' => $orderResult['total_fee'],
-            'refund_channel' => 'ORIGINAL',
-            'nonce_str' => Helper::guid()
-        ];
-        $refundResult = PaymentApi::getInstance()->submitRefund($params);
-        if ($refundResult) {
-            OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 5);
-        } else {
-            OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 4);
-            throw new \Exception('快速退款失败，将转由人工处理', 220);
-        }
-        return true;
     }
 
 }

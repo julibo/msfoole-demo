@@ -21,6 +21,6 @@ API__HOSPITAL__HOST: http://www.cdzykc.com/mod_zykc_server
 API__HOSPITAL__USER: 123
 # pay
 PAY__WEIFUTONG__URL: https://pay.swiftpass.cn/pay/gateway
-PAY__WEIFUTONG__NOTIFY_URL: http://114.215.190.171:9555/Index/Payment/callbackWFT
+PAY__WEIFUTONG__NOTIFY_URL: http://114.215.190.171:9666/Index/Payment/callbackWFT
 PAY__WEIFUTONG__MCHID: 7551000001
 PAY__WEIFUTONG__KEY: 9d101c97133837e13dde2d32a5054abb

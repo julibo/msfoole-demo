@@ -130,7 +130,7 @@ class PaymentApi
             $this->reqHandler->setReqParams($params,array('method'));
             $reqParam = $this->reqHandler->getAllParameters();
             if(empty($reqParam['transaction_id']) && empty($reqParam['out_trade_no'])){
-                throw new \Exception('请输入商户订单号!');
+                throw new \Exception('请输入商户订单号!', 500);
             }
             $this->reqHandler->setParameter('version',$this->cfg['version']);
             $this->reqHandler->setParameter('service','unified.trade.refund');//接口类型：unified.trade.refund
@@ -158,14 +158,13 @@ class PaymentApi
                         Log::info('Refund:提交退款成功：{message}', ['message'=>json_encode($res)]);
                         return true;
                     }else{
-                        throw new \Exception($this->resHandler->getParameter('err_msg'), $this->resHandler->getParameter('err_code'));
+                        throw new \Exception($this->resHandler->getParameter('err_msg'), 510);
                     }
                 }
-                throw new \Exception($this->resHandler->getParameter('message'), $this->resHandler->getParameter('status'));
+                throw new \Exception($this->resHandler->getParameter('message'), 520);
             }else{
-                throw new \Exception($this->pay->getErrInfo(), $this->pay->getResponseCode());
+                throw new \Exception($this->pay->getErrInfo(), 530);
             }
-
         } catch (\Exception $e) {
             Log::error('Refund:退款提交失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
             return false;
