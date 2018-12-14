@@ -9,6 +9,7 @@ use GuzzleHttp\Client;
 use Julibo\Msfoole\Facade\Config;
 use Julibo\Msfoole\Facade\Log;
 use App\Validator\Feedback;
+use Julibo\Msfoole\Exception;
 
 class HospitalApi
 {
@@ -43,7 +44,8 @@ class HospitalApi
      * API接口调用方法
      * @param $code
      * @param string $content
-     * @return mixed
+     * @return array
+     * @throws Exception
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function apiClient($code, $content = "") : array
@@ -59,18 +61,18 @@ class HospitalApi
             'content' => $content
         ];
         $body = json_encode($body);
-        Log::info('HospitalApi:发起请求，入参：{body}', ['body'=>$body]);
+        Log::debug('HospitalApi:发起请求，入参：{body}', ['body'=>$body]);
         $response = $this->client->request('POST', $this->apiHost, [
             'body' => $body
         ]);
         $data = $response->getBody();
-        Log::info('HospitalApi:获取结果，入参：{body}，接口返回：{data}', ['body'=>$body, 'data'=>$data]);
+        Log::debug('HospitalApi:获取结果，入参：{body}，接口返回：{data}', ['body'=>$body, 'data'=>$data]);
         $data = json_decode($data, true);
         if (empty($data) || !isset($data['errorcode']) || !isset($data['response'])) {
-            throw new \Exception(Feedback::$Exception['INTERFACE_EXCEPTION_API']['msg'], Feedback::$Exception['INTERFACE_EXCEPTION_API']['code']);
+            throw new Exception(Feedback::$Exception['INTERFACE_EXCEPTION_API']['msg'], Feedback::$Exception['INTERFACE_EXCEPTION_API']['code']);
         }
         if ($data['errorcode'] != 0) {
-            throw new \Exception($data['msg'], $data['errorcode']);
+            throw new Exception($data['msg'], $data['errorcode']);
         }
         $result = $data['response'] ?: [];
         return $result;
@@ -80,6 +82,7 @@ class HospitalApi
      * 通过卡号查询用户信息
      * @param string $cardNo
      * @return array
+     * @throws Exception
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getUser(string $cardNo) : array
@@ -89,6 +92,5 @@ class HospitalApi
         $result['cardno'] = $cardNo;
         $result['mobile'] = '18140106050';
         return $result;
-        // return json_decode('{"mobile":"18140106050","xm":"刘青洋","xb":"男","mz":"汉族","dabh":"00000005","csrq":"1982-04-05","cardno":"00000005"}', true);
     }
 }

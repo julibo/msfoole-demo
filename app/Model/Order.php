@@ -6,6 +6,7 @@
 namespace App\Model;
 
 use Julibo\Msfoole\Helper;
+use Julibo\Msfoole\Facade\Log;
 
 class Order extends BaseModel
 {
@@ -66,8 +67,8 @@ class Order extends BaseModel
             'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,
         ];
-
         $insertResult = $this->db->data($data)->insert();
+        Log::sql("创建挂号订单：" . $this->db->getLastSql());
         if ($insertResult) {
             return $data;
         } else {
@@ -88,6 +89,7 @@ class Order extends BaseModel
         $result = $this->db
             ->where('out_trade_no', $out_trade_no)
             ->find();
+        Log::sql("根据单号查询订单：" . $this->db->getLastSql());
         return $result;
     }
 
@@ -108,6 +110,7 @@ class Order extends BaseModel
                 'status'  => $status,
                 'code' => $code,
             ]);
+        Log::sql("更新订单状态及操作码：" . $this->db->getLastSql());
         return $result;
     }
 
@@ -124,6 +127,7 @@ class Order extends BaseModel
         $result = $this->db
             ->where('code', $code)
             ->find();
+        Log::sql("通过操作码取得订单：" . $this->db->getLastSql());
         return $result;
     }
 
@@ -161,8 +165,8 @@ class Order extends BaseModel
             'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,
         ];
-
         $insertResult = $this->db->data($data)->insert();
+        Log::sql("创建缴费订单：" . $this->db->getLastSql());
         if ($insertResult) {
             return $data;
         } else {

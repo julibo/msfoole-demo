@@ -11,6 +11,7 @@ use App\Lib\Pay\PayHttpClient;
 use App\Lib\Pay\Utils;
 use Julibo\Msfoole\Facade\Config;
 use Julibo\Msfoole\Facade\Log;
+use Julibo\Msfoole\Exception;
 
 class PaymentApi
 {
@@ -58,6 +59,7 @@ class PaymentApi
     public function createOrder(array $param, int $service)
     {
         try {
+            Log::debug('Refund:订单创建开始：{message}', ['message'=>json_encode($param)]);
             $this->reqHandler->setReqParams($param,array('method'));
             switch ($service) {
                 case 1:
@@ -90,14 +92,14 @@ class PaymentApi
                             'code_status'=>$this->resHandler->getParameter('code_status'),
                             'type'=>$this->reqHandler->getParameter('service'));
                     }else{
-                        throw new \Exception($this->resHandler->getParameter('err_msg'), $this->resHandler->getParameter('err_code'));
+                        throw new Exception($this->resHandler->getParameter('err_msg'), 540);
                     }
                 }
-                throw new \Exception($this->resHandler->getParameter('message'), $this->resHandler->getParameter('status'));
+                throw new Exception($this->resHandler->getParameter('message'), 550);
             }else{
-                throw new \Exception($this->pay->getErrInfo(), $this->pay->getResponseCode());
+                throw new Exception($this->pay->getErrInfo(), 560);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('PayCode:二维码创建失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
         }
     }
@@ -107,7 +109,7 @@ class PaymentApi
         $this->resHandler->setContent($xml);
         $this->resHandler->setKey($this->cfg['key']);
         // 日志记录
-        Log::info('PayCall:接口回调收到通知参数：{message}', ['message'=>json_encode($this->resHandler->getAllParameters())]);
+        Log::debug('PayCall:接口回调收到通知参数：{message}', ['message'=>json_encode($this->resHandler->getAllParameters())]);
         if($this->resHandler->isTenpaySign()) {
             if($this->resHandler->getParameter('status') == 0 && $this->resHandler->getParameter('result_code') == 0) {
                 // 查询对应的订单
@@ -127,6 +129,7 @@ class PaymentApi
     public function submitRefund($params)
     {
         try {
+            Log::debug('Refund:退款提交开始：{message}', ['message'=>json_encode($params)]);
             $this->reqHandler->setReqParams($params,array('method'));
             $reqParam = $this->reqHandler->getAllParameters();
             if(empty($reqParam['transaction_id']) && empty($reqParam['out_trade_no'])){
@@ -155,17 +158,17 @@ class PaymentApi
                             'refund_channel'=>$this->resHandler->getParameter('refund_channel'),
                             'refund_fee'=>$this->resHandler->getParameter('refund_fee'),
                             'coupon_refund_fee'=>$this->resHandler->getParameter('coupon_refund_fee'));
-                        Log::info('Refund:提交退款成功：{message}', ['message'=>json_encode($res)]);
+                        Log::debug('Refund:退款提交成功：{message}', ['message'=>json_encode($res)]);
                         return true;
                     }else{
-                        throw new \Exception($this->resHandler->getParameter('err_msg'), 510);
+                        throw new Exception($this->resHandler->getParameter('err_msg'), 510);
                     }
                 }
-                throw new \Exception($this->resHandler->getParameter('message'), 520);
+                throw new Exception($this->resHandler->getParameter('message'), 520);
             }else{
-                throw new \Exception($this->pay->getErrInfo(), 530);
+                throw new Exception($this->pay->getErrInfo(), 530);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Refund:退款提交失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
             return false;
         }

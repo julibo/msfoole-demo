@@ -287,6 +287,9 @@ class Robot extends BaseServer
                             case 2:// 缴费
                                 $this->payOrderHandle($order);
                                 break;
+                            case 3:// 预约挂号
+                                $this->saleOrderHandle($order);
+                                break;
                         }
                         return 'success';
                     }
