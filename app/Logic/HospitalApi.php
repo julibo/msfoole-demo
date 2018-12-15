@@ -66,8 +66,8 @@ class HospitalApi
             'body' => $body
         ]);
         $data = $response->getBody();
-        Log::debug('HospitalApi:获取结果，入参：{body}，接口返回：{data}', ['body'=>$body, 'data'=>$data]);
         $data = json_decode($data, true);
+        Log::debug('HospitalApi:获取结果，入参：{body}，接口返回：{data}', ['body'=>$body, 'data'=>json_encode($data)]);
         if (empty($data) || !isset($data['errorcode']) || !isset($data['response'])) {
             throw new Exception(Feedback::$Exception['INTERFACE_EXCEPTION_API']['msg'], Feedback::$Exception['INTERFACE_EXCEPTION_API']['code']);
         }
