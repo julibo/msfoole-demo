@@ -90,7 +90,9 @@ class HospitalApi
         $response = $this->apiClient('byxx', ['kh'=>$cardNo]);
         $result = $response['item'];
         $result['cardno'] = $cardNo;
-        $result['mobile'] = '18140106050';
+        if (preg_match("/^1[3456789]\d{9}$/", $result['dh'])) {
+            $result['mobile'] = $result['dh'];
+        }
         return $result;
     }
 }
