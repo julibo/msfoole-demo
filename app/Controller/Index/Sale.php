@@ -30,7 +30,7 @@ class Sale extends BaseController
      */
     public function getOffices()
     {
-        $result = SaleService::getInstance()->getOffices();
+        $result = SaleService::getInstance()->getDepartment();
         return $result;
     }
 

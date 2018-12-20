@@ -42,7 +42,7 @@ class Sale extends BaseServer
             'user' => $user,
             'code' => $code,
         ];
-        $cache->set($user['mobile'], $info, 600);
+        $cache->set($number, $info, 600);
         return $msgResult > 0 ? true : false;
     }
 
@@ -51,6 +51,8 @@ class Sale extends BaseServer
      * @param $number
      * @param $code
      * @return array
+     * @throws Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function login($number, $code) : array
     {
@@ -75,10 +77,18 @@ class Sale extends BaseServer
 
     /**
      * 获取医院科室列表
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Julibo\Msfoole\Exception
      */
-    public function getOffices() : array
+    public function getDepartment() : array
     {
-        return [];
+        $result = [];
+        $response = HospitalApi::getInstance()->apiClient('ksxx');
+        if (!empty($response) && !empty($response['item'])) {
+            $result = $response['item'];
+        }
+        return $result;
     }
 
     /**
