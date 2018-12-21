@@ -35,7 +35,7 @@ MSFOOLE__CHANNEL_POOL: 2
 MSFOOLE__OPTION__WORKER_NUM: 16
 MSFOOLE__OPTION__DAEMONIZE: 1
 # openAPI
-API__HOSPITAL__HOST: http://www.cdzykc.com/mod_zykc_server
+API__HOSPITAL__HOST: http://192.168.2.1:8080
 API__HOSPITAL__USER: 123
 # pay
 PAY__WEIFUTONG__URL: https://pay.swiftpass.cn/pay/gateway
