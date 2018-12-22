@@ -196,7 +196,7 @@ class Robot extends BaseServer
                 'client' => $order['client'],
                 'group' => 1,
                 'result' => 1,
-                'body' => [['mzh' => $regResult, 'lx' => 1]],
+                'body' => ['mzh' => $regResult, 'lx' => 1],
                 'mzh' => $regResult,
             ];
             Channel::instance()->push($notice);
@@ -241,7 +241,7 @@ class Robot extends BaseServer
                 'client' => $order['client'],
                 'group' => 2,
                 'result' => 1,
-                'body' => [['skbs' => $payResult, 'lx' => 2]],
+                'body' => ['skbs' => $payResult, 'lx' => 2],
                 'ksbs' => $payResult
             ];
             Channel::instance()->push($notice);
