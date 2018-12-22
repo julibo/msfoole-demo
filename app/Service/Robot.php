@@ -196,8 +196,7 @@ class Robot extends BaseServer
                 'client' => $order['client'],
                 'group' => 1,
                 'result' => 1,
-                'title' => '挂号费',
-                'body' => [['title' => '挂号费', 'cost' => $info['zfje']]],
+                'body' => [['mzh' => $regResult, 'lx' => 1]],
                 'mzh' => $regResult,
             ];
             Channel::instance()->push($notice);
@@ -205,7 +204,7 @@ class Robot extends BaseServer
                 'type' => 2,
                 'class' => self::class,
                 'method' => 'sendSms',
-                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'挂号成功，请按时就诊']
+                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'挂号成功，欢迎就诊']
             ];
             Channel::instance()->push($sms);
         } else {
@@ -242,8 +241,8 @@ class Robot extends BaseServer
                 'client' => $order['client'],
                 'group' => 2,
                 'result' => 1,
-                'title' => '门诊缴费',
-                'body' => [['title' => '门诊缴费', 'cost' => $info['zfje']]],
+                'body' => [['skbs' => $payResult, 'lx' => 2]],
+                'ksbs' => $payResult
             ];
             Channel::instance()->push($notice);
             $sms = [
