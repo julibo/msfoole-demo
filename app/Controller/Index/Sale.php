@@ -16,12 +16,33 @@ class Sale extends BaseController
     }
 
     /**
-     * 预约挂号首页
+     * 获取用户信息
+     * @return mixed
      */
-    public function index()
+     public function getUser()
+     {
+         return $this->user;
+     }
+
+    /**
+     * 预约列表
+     * @return mixed
+     */
+     public function index()
+     {
+         $cardNo = $this->user['cardno'] ?? null;
+         $result = SaleService::getInstance()->getRecord($cardNo);
+         return $result;
+     }
+
+    /**
+     * 取消预约
+     */
+    public function cancel()
     {
-        $cardNo = $this->user->cardno;
-        $result = SaleService::getInstance()->getRecord($cardNo);
+        $hybh = $this->params['hybh'] ?? null;
+        $sjh = $this->params['sjh'] ?? null;
+        $result = SaleService::getInstance()->cancelNo($hybh, $sjh);
         return $result;
     }
 
@@ -39,15 +60,38 @@ class Sale extends BaseController
      */
     public function getSource()
     {
+        $appoint = $this->params['appoint'] ?? null;
+        $ksbm = $this->params['ksbm'] ?? null;
+        $result = SaleService::getInstance()->getSource($ksbm, $appoint);
+        return $result;
+    }
 
+    public function getSourceDate()
+    {
+        $result = [];
+        $weekarray = array("日","一","二","三","四","五","六");
+        for($i = 1; $i < 8; $i++) {
+            $date = date('Y-m-d', strtotime($i . ' days'));
+            $showDate = date('m月d日', strtotime($i . ' days'));
+            $week = '星期' . $weekarray[date("w", strtotime($i . ' days'))];
+            $result[$date] = sprintf('%s %s', $showDate, $week);
+        }
+        return $result;
     }
 
     /**
-     * 订单预览
+     * 预约登记
      */
-    public function preview()
+    public function checkIn()
     {
-
+        $kh = $this->user['cardno'] ?? null;
+        $ysbh = $this->params['ysbh'] ?? null;
+        $zzks = $this->params['zzks'] ?? null;
+        $ghrq = $this->params['ghrq'] ?? null;
+        $ghlb = $this->params['ghlb'] ?? null;
+        $ysh_lx = $this->params['ysh_lx'] ?? null;
+        $result = SaleService::getInstance()->checkIn($kh, $ysbh, $zzks, $ghrq, $ghlb, $ysh_lx);
+        return $result;
     }
 
     /**
@@ -55,7 +99,18 @@ class Sale extends BaseController
      */
     public function createOrder()
     {
-
+        $kh = $this->user['cardno'] ?? null;
+        $ysbh = $this->params['ysbh'] ?? null;
+        $zzks = $this->params['zzks'] ?? null;
+        $ghrq = $this->params['ghrq'] ?? null;
+        $ghlb = $this->params['ghlb'] ?? null;
+        $ysh_lx = $this->params['ysh_lx'] ?? null;
+        $ghf = $this->params['ghf'] ?? null;
+        $zfzl = $this->params['zfzl'] ?? null;
+        $ip = $this->user->ip ?? '127.0.0.1';
+        $body = '挂号费';
+        $result = SaleService::getInstance()->createOrder($kh, $ysbh, $zzks, $ghrq, $ghlb, $ysh_lx, $zfzl, $ghf, $ip, $body);
+        return $result;
     }
 
     /**
@@ -63,15 +118,11 @@ class Sale extends BaseController
      */
     public function refresh()
     {
-
+        $tradeNo = $this->params['tradeNo'];
+        $cardNo = $this->user['cardno'] ?? null;
+        $result = SaleService::getInstance()->getOrder($cardNo, $tradeNo);
+        return $result;
     }
 
-    /**
-     * 取消预约
-     */
-    public function cancel()
-    {
-
-    }
 
 }

@@ -174,4 +174,69 @@ class Order extends BaseModel
         }
     }
 
+    /**
+     *  创建预约挂号订单
+     * @param $cardno
+     * @param $ysbh
+     * @param $zzks
+     * @param $ghrq
+     * @param $ghlb
+     * @param $ysh_lx
+     * @param $zfzl
+     * @param $zfje
+     * @param $body
+     * @param $ip
+     * @param int $group
+     * @param int $source
+     * @param int $type
+     * @return array|bool
+     */
+    public function createSaleOrder($cardno, $ysbh, $zzks, $ghrq, $ghlb, $ysh_lx, $zfzl, $zfje, $body, $ip, $group = 3, $source = 2, $type = 1)
+    {
+        $info = ['kh' => $cardno, 'ysbh' => $ysbh, 'zzks' => $zzks, 'ghrq'=>$ghrq, 'ghlb'=>$ghlb, 'ysh_lx'=>$ysh_lx, 'zfje' => $zfje, 'zfzl'=> $zfzl];
+        $nonce_str = Helper::guid();
+        $orderID = $this->getOrderID($cardno);
+        $data = [
+            'out_trade_no' => $orderID,
+            'user' => $cardno,
+            'group' => $group,
+            'info' => json_encode($info),
+            'type' => $type,
+            'source' => $source,
+            'method' => $zfzl,
+            'body' => $body,
+            'total_fee' => $zfje * 100,
+            'mch_create_ip' => $ip,
+            'time_start' => date('Y-m-d H:i:s'),
+            'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
+            'nonce_str' => $nonce_str,
+        ];
+        $insertResult = $this->db->data($data)->insert();
+        Log::sql("创建挂号订单：" . $this->db->getLastSql());
+        if ($insertResult) {
+            return $data;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 根据单号和卡号查询订单
+     * @param $cardNo
+     * @param $out_trade_no
+     * @return array|\PDOStatement|string|\think\Model|null
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getOrderByTradeAndCard($cardNo, $out_trade_no)
+    {
+        $result = $this->db
+            ->where('out_trade_no', $out_trade_no)
+            ->where('user', $cardNo)
+            ->find();
+        Log::sql("根据单号查询订单：" . $this->db->getLastSql());
+        return $result;
+    }
+
 }

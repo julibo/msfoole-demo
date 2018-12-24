@@ -470,4 +470,65 @@ class Robot extends BaseServer
         return true;
     }
 
+    /**
+     * @param array $order
+     */
+    private function saleOrderHandle(array $order)
+    {
+        $result = false;
+        $info = json_decode($order['info'], true);
+        $responseDj = HospitalApi::getInstance()->apiClient('yydj', [
+            'kh' => $info['kh'],
+            'ysbh' => $info['ysbh'],
+            'zzks' => $info['zzks'],
+            'ghrq' => $info['ghrq'],
+            'ghlb' => $info['ghlb'],
+            'ysh_lx' => $info['ysh_lx'],
+        ]);
+        if (!empty($responseDj) && $responseDj['hybh']) {
+            $responseQh = HospitalApi::getInstance()->apiClient('yydj_qh', [
+                'hybh' => $responseDj['hybh'],
+                'sjh' => $order['out_trade_no'],
+                'zfzl' => $info['zfzl'],
+                'zfje' => $info['zfje']
+            ]);
+            if (!empty($responseQh) && $responseQh['mzh']) {
+                $result = true;
+            }
+        }
+        if ($result) {
+            $sms = [
+                'type' => 2,
+                'class' => self::class,
+                'method' => 'sendSms',
+                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'预约挂号成功，欢迎准时就诊']
+            ];
+            Channel::instance()->push($sms);
+        } else {
+            $sms = [
+                'type' => 2,
+                'class' => static::class,
+                'method' => 'sendSms',
+                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'预约挂号失败，挂号费将按原路返回']
+            ];
+            Channel::instance()->push($sms);
+            // 原路返回
+            $params = [
+                'out_trade_no' => $order['out_trade_no'],
+                'out_refund_no' => $order['out_trade_no'] . 'R',
+                'total_fee' => $order['total_fee'],
+                'refund_fee' => $order['total_fee'],
+                'refund_channel' => 'ORIGINAL',
+                'nonce_str' => Helper::guid()
+            ];
+            $refundResult = PaymentApi::getInstance()->submitRefund($params);
+            if ($refundResult) {
+                OrderModel::getInstance()->updateOrderStatus($order['id'], 5);
+            } else {
+                OrderModel::getInstance()->updateOrderStatus($order['id'], 4);
+                throw new Exception('快速退款失败，将转由人工处理', 220);
+            }
+        }
+    }
+
 }
