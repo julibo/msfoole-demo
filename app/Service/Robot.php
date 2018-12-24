@@ -471,7 +471,10 @@ class Robot extends BaseServer
     }
 
     /**
+     * 预约挂号
      * @param array $order
+     * @throws Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function saleOrderHandle(array $order)
     {
@@ -504,6 +507,7 @@ class Robot extends BaseServer
                 'parameter' => ['cardno'=>$info['cardno'], 'content'=>'预约挂号成功，欢迎准时就诊']
             ];
             Channel::instance()->push($sms);
+            OrderModel::getInstance()->updateOrderStatus($order['id'], 2, $responseQh['mzh']);
         } else {
             $sms = [
                 'type' => 2,

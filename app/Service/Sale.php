@@ -7,6 +7,7 @@ namespace App\Service;
 use Julibo\Msfoole\Facade\Config;
 use Julibo\Msfoole\Cache;
 use Julibo\Msfoole\Exception;
+use Julibo\Msfoole\Helper;
 use App\Lib\Helper\Message;
 use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
@@ -105,8 +106,30 @@ class Sale extends BaseServer
             ]);
             return true;
         } else {
-
-
+            # 取得订单
+            $orderResult = OrderModel::getInstance()->getOrderByTradeNo($sjh);
+            if (empty($orderResult)) {
+                throw new Exception('订单不存在或无权操作', 210);
+            }
+            // 先取消挂号再退款
+            HospitalApi::getInstance()->apiClient('qxyydj', [
+                'hybh' => $hybh
+            ]);
+            $params = [
+                'out_trade_no' => $orderResult['out_trade_no'],
+                'out_refund_no' => $orderResult['out_trade_no'] . 'R',
+                'total_fee' => $orderResult['total_fee'],
+                'refund_fee' => $orderResult['total_fee'],
+                'refund_channel' => 'ORIGINAL',
+                'nonce_str' => Helper::guid()
+            ];
+            $refundResult = PaymentApi::getInstance()->submitRefund($params);
+            if ($refundResult) {
+                OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 5);
+            } else {
+                OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 4);
+                throw new Exception('快速退款失败，将转由人工处理', 220);
+            }
         }
     }
 
