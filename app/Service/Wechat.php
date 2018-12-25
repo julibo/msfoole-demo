@@ -18,6 +18,12 @@ class Wechat extends BaseServer
         $this->weObj = new WechatApi($options);
     }
 
+    public function setParam($requestMethod, $param)
+    {
+        $this->weObj->requestMethod = $requestMethod;
+        $_GET = $param;
+    }
+
     public function valid($return = true)
     {
         $this->weObj->valid($return);

@@ -240,6 +240,7 @@ class Wechat
 	public $errCode = 40001;
 	public $errMsg = "no access";
 	public $logcallback;
+	public $requestMethod;
 
 	public function __construct($options)
 	{
@@ -281,7 +282,7 @@ class Wechat
 	public function valid($return=false)
     {
         $encryptStr="";
-        if ($_SERVER['REQUEST_METHOD'] == "POST") {
+        if ($this->requestMethod == "POST") {
             $postStr = file_get_contents("php://input");
             $array = (array)simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
             $this->encrypt_type = isset($_GET["encrypt_type"]) ? $_GET["encrypt_type"]: '';
