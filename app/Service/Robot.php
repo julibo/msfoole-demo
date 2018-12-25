@@ -249,7 +249,7 @@ class Robot extends BaseServer
                 'type' => 2,
                 'class' => self::class,
                 'method' => 'sendSms',
-                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'缴费成功，欢迎惠顾']
+                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'缴费成功，祝您早日康复！']
             ];
             Channel::instance()->push($sms);
         } else {
