@@ -19,7 +19,7 @@ abstract class BaseServer
         if (is_null(self::$instance)) {
             self::$instance = new static;
         }
-        return self::$instance;
+        return new static;
     }
 
     abstract protected function init();

@@ -53,32 +53,4 @@ class Index extends BaseController
         }
         return $result;
     }
-
-    /**
-     * 预约挂号首页
-     */
-    public function test()
-    {
-        $cardNo = '00000005';
-        $result = SaleService::getInstance()->getRecord($cardNo);
-        return $result;
-        // $cardNo = $this->user->cardno;
-//        $cardNo = '00000005';
-//        $result = SaleService::getInstance()->getSource($cardNo);
-//        $result = SaleService::getInstance()->getSource("010101", '2018-12-23');
-//        $params = [
-//            "kh"=> "00000005",
-//            "ysbh"=>"2",
-//            "zzks"=>"010101",
-//            "ghrq"=> "2018-12-23",
-//            "ghlb"=>"1",
-//            "ysh_lx"=>"1",
-//        ];
-//        $result = SaleService::getInstance()->checkIn($params['kh'], $params['ysbh'], $params['zzks'], $params['ghrq'], $params['ghlb'], $params['ysh_lx']);
-//        return $result;
-//        $result = SaleService::getInstance()->receiveNo(62, 123456, 1, 1);
-//       return $result;
-//        $result = SaleService::getInstance()->cancelNo(64);
-//        return $result;
-    }
 }

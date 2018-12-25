@@ -504,7 +504,7 @@ class Robot extends BaseServer
                 'type' => 2,
                 'class' => self::class,
                 'method' => 'sendSms',
-                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'预约挂号成功，欢迎准时就诊']
+                'parameter' => ['cardno'=>$info['kh'], 'content'=>'预约挂号成功，欢迎准时就诊']
             ];
             Channel::instance()->push($sms);
             OrderModel::getInstance()->updateOrderStatus($order['id'], 2, $responseQh['mzh']);
@@ -513,7 +513,7 @@ class Robot extends BaseServer
                 'type' => 2,
                 'class' => static::class,
                 'method' => 'sendSms',
-                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'预约挂号失败，挂号费将按原路返回']
+                'parameter' => ['cardno'=>$info['kh'], 'content'=>'预约挂号失败，挂号费将按原路返回']
             ];
             Channel::instance()->push($sms);
             // 原路返回

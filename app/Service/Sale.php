@@ -130,6 +130,7 @@ class Sale extends BaseServer
                 OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 4);
                 throw new Exception('快速退款失败，将转由人工处理', 220);
             }
+            return true;
         }
     }
 
