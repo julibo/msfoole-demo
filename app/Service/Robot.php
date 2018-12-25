@@ -241,8 +241,8 @@ class Robot extends BaseServer
                 'client' => $order['client'],
                 'group' => 2,
                 'result' => 1,
-                'body' => ['skbs' => $payResult, 'lx' => 2],
-                'ksbs' => $payResult
+                'body' => ['skbs' => $payResult['skbs'], 'lx' => 2],
+                'ksbs' => $payResult['skbs']
             ];
             Channel::instance()->push($notice);
             $sms = [
