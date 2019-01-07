@@ -49,7 +49,7 @@ class HospitalApi
      * @throws Exception
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function apiClient($code, $content = "") : array
+    public function apiClient($code, $content = "")
     {
         $this->client = new Client(['cookies' => false]);
         $body = [

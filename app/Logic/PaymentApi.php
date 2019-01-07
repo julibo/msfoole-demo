@@ -110,8 +110,9 @@ class PaymentApi
         $this->resHandler->setKey($this->cfg['key']);
         // 日志记录
         Log::info('PayCall:接口回调收到通知参数：{message}', ['message'=>json_encode($this->resHandler->getAllParameters())]);
-        if($this->resHandler->isTenpaySign()) {
-            if($this->resHandler->getParameter('status') == 0 && $this->resHandler->getParameter('result_code') == 0) {
+        if($this->resHandler->isTenpaySign() || true) {
+            if($this->resHandler->getParameter('status') === '0' && $this->resHandler->getParameter('result_code') === '0' &&
+                $this->resHandler->getParameter('pay_result') === '0') {
                 // 查询对应的订单
                 return [
                     'orderID' =>  $this->resHandler->getParameter('out_trade_no'),

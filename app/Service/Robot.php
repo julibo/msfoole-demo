@@ -118,7 +118,7 @@ class Robot extends BaseServer
      * 获取医院科室列表
      * @return array
      */
-    public function getDepartment() : array
+    public function getDepartment()
     {
         $result = [];
         $response = $this->hospitalApi->apiClient('ksxx');
@@ -134,7 +134,7 @@ class Robot extends BaseServer
      * @return array
      * @throws \Exception
      */
-    public function getSourceList($ksbm = null) : array
+    public function getSourceList($ksbm = null)
     {
         $result = [];
         if (empty($ksbm)) {
@@ -307,7 +307,7 @@ class Robot extends BaseServer
      * @param int $orderID
      * @return bool
      */
-    private function register(array $info, string $orderNo, int $orderID)
+    private function register(array $info, $orderNo, $orderID)
     {
         $result = false;
         $content = [
@@ -337,7 +337,7 @@ class Robot extends BaseServer
      * @param int $orderID
      * @return bool
      */
-    private function payment(array $info, int $orderID)
+    private function payment(array $info, $orderID)
     {
         $result = false;
         $content = [
@@ -366,7 +366,7 @@ class Robot extends BaseServer
      * @throws Exception
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public static function sendSms(string $cardNo, string $content)
+    public static function sendSms($cardNo, $content)
     {
         $user = HospitalApi::getInstance()->getUser($cardNo);
         if (!empty($user) && !empty($content) && !empty($user['mobile']) && preg_match("/^1[3456789]\d{9}$/", $user['mobile'])) {
@@ -380,7 +380,7 @@ class Robot extends BaseServer
      * @param string $cardNo
      * @return array
      */
-    public function getPayment(string $cardNo) : array
+    public function getPayment($cardNo)
     {
         $result = [];
         $response = $this->hospitalApi->apiClient('getjfmx', ['kh'=>$cardNo]);
@@ -402,7 +402,7 @@ class Robot extends BaseServer
      * @return mixed
      * @throws Exception
      */
-    public function createPayOrder(string $cardNo, string $mzh, float $zfje, int $zfzl, string $body, string $ip, string $token) : string
+    public function createPayOrder($cardNo, $mzh, $zfje, $zfzl, $body, $ip, $token)
     {
         if (empty($cardNo) || empty($mzh) || empty($zfje) || empty($zfzl) || empty($body) || empty($ip) || empty($token)) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
@@ -427,7 +427,7 @@ class Robot extends BaseServer
      * @return bool
      * @throws Exception
      */
-    public function cancelPay(string $cardNo, string $orderID, string $skbs, float $zfje)
+    public function cancelPay($cardNo, $orderID, $skbs, $zfje)
     {
         if (empty($cardNo) || empty($orderID) || empty($skbs) || empty($zfje)) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
