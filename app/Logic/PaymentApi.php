@@ -27,7 +27,7 @@ class PaymentApi
         $this->Request();
     }
 
-    public static function getInstance($force = true) : self
+    public static function getInstance($force = false) : self
     {
         if (is_null(self::$instance) || $force) {
             self::$instance = new static;
@@ -78,7 +78,6 @@ class PaymentApi
             $this->reqHandler->setParameter('notify_url',$this->cfg['notify_url']);
             $this->reqHandler->setParameter('nonce_str', $param['nonce_str']); //随机字符串，必填项，不长于 32 位
             $this->reqHandler->createSign();//创建签名
-
             $data = Utils::toXml($this->reqHandler->getAllParameters());
             $this->pay->setReqContent($this->reqHandler->getGateURL(),$data);
             if($this->pay->call()) {
@@ -109,7 +108,7 @@ class PaymentApi
         $this->resHandler->setContent($xml);
         $this->resHandler->setKey($this->cfg['key']);
         // 日志记录
-        Log::debug('PayCall:接口回调收到通知参数：{message}', ['message'=>json_encode($this->resHandler->getAllParameters())]);
+        Log::info('PayCall:接口回调收到通知参数：{message}', ['message'=>json_encode($this->resHandler->getAllParameters())]);
         if($this->resHandler->isTenpaySign()) {
             if($this->resHandler->getParameter('status') == 0 && $this->resHandler->getParameter('result_code') == 0) {
                 // 查询对应的订单
@@ -125,11 +124,10 @@ class PaymentApi
         }
     }
 
-
     public function submitRefund($params)
     {
         try {
-            Log::debug('Refund:退款提交开始：{message}', ['message'=>json_encode($params)]);
+            Log::info('Refund:退款提交开始：{message}', ['message'=>json_encode($params)]);
             $this->reqHandler->setReqParams($params,array('method'));
             $reqParam = $this->reqHandler->getAllParameters();
             if(empty($reqParam['transaction_id']) && empty($reqParam['out_trade_no'])){
@@ -139,7 +137,7 @@ class PaymentApi
             $this->reqHandler->setParameter('service','unified.trade.refund');//接口类型：unified.trade.refund
             $this->reqHandler->setParameter('mch_id',$this->cfg['mchid']);//必填项，商户号，由威富通分配
             $this->reqHandler->setParameter('nonce_str', $params['nonce_str']);//随机字符串，必填项，不长于 32 位
-            $this->reqHandler->setParameter('op_user_id',$this->cfg['mchid']);//必填项，操作员帐号,默认为商户号
+            $this->reqHandler->setParameter('op_user_id',$this->cfg['op_user_id']);//必填项，操作员帐号,默认为商户号
             $this->reqHandler->setParameter('sign_type',$this->cfg['sign_type']);
 
             $this->reqHandler->createSign();//创建签名
@@ -158,7 +156,7 @@ class PaymentApi
                             'refund_channel'=>$this->resHandler->getParameter('refund_channel'),
                             'refund_fee'=>$this->resHandler->getParameter('refund_fee'),
                             'coupon_refund_fee'=>$this->resHandler->getParameter('coupon_refund_fee'));
-                        Log::debug('Refund:退款提交成功：{message}', ['message'=>json_encode($res)]);
+                        Log::info('Refund:退款提交成功：{message}', ['message'=>json_encode($res)]);
                         return true;
                     }else{
                         throw new Exception($this->resHandler->getParameter('err_msg'), 510);

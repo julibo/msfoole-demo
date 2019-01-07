@@ -23,6 +23,10 @@ class Feedback
         'PARAMETER_LENGTH_LONG' => ['code' => 52, 'msg' => '参数长度太长'],
         'PARAMETER_LENGTH_SHORT' => ['code' => 54, 'msg' => '参数长度太短'],
         'PARAMETER_OUT_RANGE' => ['code' => 55, 'msg' => '参数超出范围'],
+        // 业务异常
+        'SERVICE_SQL_ERROR' => ['code' => 60, 'msg' => '业务流程sql异常'],
+        'SERVICE_AUTH_ERROR' => ['code' => 61, 'msg' => '业务流程权限异常'],
+        'SERVICE_API_ERROR' => ['code' => 62, 'msg' => '业务流程接口异常'],
         // 其他异常
         'INTERFACE_EXCEPTION' => ['code' => 90, 'msg' => 'API接口异常'],
 

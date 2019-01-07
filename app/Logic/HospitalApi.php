@@ -30,11 +30,12 @@ class HospitalApi
 
     /**
      * 实例化
+     * @param bool $force
      * @return HospitalApi
      */
-    public static function getInstance() : self
+    public static function getInstance($force = false) : self
     {
-        if (is_null(self::$instance)) {
+        if (is_null(self::$instance) || $force) {
             self::$instance = new static;
         }
         return self::$instance;
