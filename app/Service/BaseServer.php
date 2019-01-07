@@ -7,7 +7,7 @@ namespace App\Service;
 
 abstract class BaseServer
 {
-    protected static $instance;
+    protected static $instance = [];
 
     public function __construct()
     {
@@ -16,10 +16,11 @@ abstract class BaseServer
 
     public static function getInstance() :self
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new static;
+        $name = md5(static::class);
+        if (empty(self::$instance[$name])) {
+            self::$instance[$name] = new static;
         }
-        return self::$instance;
+        return self::$instance[$name];
     }
 
     abstract protected function init();

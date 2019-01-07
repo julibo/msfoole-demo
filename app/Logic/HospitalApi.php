@@ -30,11 +30,12 @@ class HospitalApi
 
     /**
      * 实例化
+     * @param bool $force
      * @return HospitalApi
      */
-    public static function getInstance() : self
+    public static function getInstance($force = false) : self
     {
-        if (is_null(self::$instance)) {
+        if (is_null(self::$instance) || $force) {
             self::$instance = new static;
         }
         return self::$instance;
@@ -48,7 +49,7 @@ class HospitalApi
      * @throws Exception
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function apiClient($code, $content = "") : array
+    public function apiClient($code, $content = "")
     {
         $this->client = new Client(['cookies' => false]);
         $body = [
@@ -61,15 +62,16 @@ class HospitalApi
             'content' => $content
         ];
         $body = json_encode($body);
+        $time = microtime(true);
         Log::debug('HospitalApi:发起请求，入参：{body}', ['body'=>$body]);
         $response = $this->client->request('POST', $this->apiHost, [
             'body' => $body
         ]);
         $data = $response->getBody();
         $data = json_decode($data, true);
-        Log::debug('HospitalApi:获取结果，入参：{body}，接口返回：{data}', ['body'=>$body, 'data'=>json_encode($data)]);
+        Log::info('HospitalApi:获取结果，入参：{body}，接口返回：{data}，耗时：{time}秒', ['body'=>$body, 'data'=>json_encode($data), 'time'=>microtime(true) - $time]);
         if (empty($data) || !isset($data['errorcode']) || !isset($data['response'])) {
-            throw new Exception(Feedback::$Exception['INTERFACE_EXCEPTION_API']['msg'], Feedback::$Exception['INTERFACE_EXCEPTION_API']['code']);
+            throw new Exception(Feedback::$Exception['INTERFACE_EXCEPTION']['msg'], Feedback::$Exception['INTERFACE_EXCEPTION']['code']);
         }
         if ($data['errorcode'] != 0) {
             throw new Exception($data['msg'], $data['errorcode']);

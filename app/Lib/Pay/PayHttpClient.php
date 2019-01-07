@@ -92,7 +92,6 @@ class PayHttpClient {
 		// 执行操作
 		$res = curl_exec($ch);
 		$this->responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		
 		if ($res == NULL) { 
 		   $this->errInfo = "call http err :" . curl_errno($ch) . " - " . curl_error($ch) ;
 		   curl_close($ch);

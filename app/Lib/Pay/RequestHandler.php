@@ -96,7 +96,7 @@ class RequestHandler {
 	*获取参数值
 	*/
 	function getParameter($parameter) {
-		return isset($this->parameters[$parameter])?$this->parameters[$parameter]:'';
+		return isset($this->parameters[$parameter])?$this->parameters[$parameter]:null;
 	}
 	
 	/**

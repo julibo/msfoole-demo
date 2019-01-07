@@ -14,21 +14,21 @@ use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
 use App\Model\Order as OrderModel;
 use App\Lib\Helper\Message;
+use App\Validator\Feedback;
 
 class Robot extends BaseServer
 {
+    private $hospitalApi;
 
     protected function init()
     {
-        // TODO: Implement init() method.
+        $this->hospitalApi = HospitalApi::getInstance();
     }
 
     /**
      * websocket 登陆
      * @param array $params
-     * @return array|bool
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Julibo\Msfoole\Exception
+     * @return bool
      */
     public function login(array $params)
     {
@@ -53,7 +53,7 @@ class Robot extends BaseServer
                 return false;
             }
         }
-        $user = HospitalApi::getInstance()->getUser($cardno);
+        $user = $this->hospitalApi->getUser($cardno);
         return $user;
     }
 
@@ -61,17 +61,18 @@ class Robot extends BaseServer
      * 获取当日挂号记录
      * @param string $cardno
      * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Julibo\Msfoole\Exception
      */
     public function getTodayRegister(string $cardno)
     {
          $result = [];
-         $response = HospitalApi::getInstance()->apiClient('ghxx', ['kh'=>$cardno]);
+         $response = $this->hospitalApi->apiClient('ghxx', ['kh'=>$cardno]);
          if (!empty($response) && !empty($response['item'])) {
              foreach ($response['item'] as $vo) {
-                 if ($vo['yfsfy'] == "False")
+                 if ($vo['yfsfy'] == "False") {
+                     $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
+                     $vo['hj'] = sprintf('￥%s', $vo['hj']);
                      array_push($result, $vo);
+                 }
              }
          }
          return $result;
@@ -80,22 +81,21 @@ class Robot extends BaseServer
     /**
      * 取消当日挂号
      * @param $cardno
-     * @param null $mzh
+     * @param $mzh
      * @return bool
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Julibo\Msfoole\Exception
+     * @throws \Exception
      */
-    public function cancelReg($cardno, $mzh = null)
+    public function cancelReg($cardno, $mzh)
     {
         if (empty($cardno) || empty($mzh)) {
-            throw new \Exception('缺少必要的参数', 200);
+            throw new \Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         # 取得订单
         $morder = OrderModel::getInstance()->getOrderByCode($mzh);
         if (empty($morder)) {
-            throw new \Exception('订单不存在', 210);
+            throw new \Exception('该订单不存在', Feedback::$Exception['SERVICE_SQL_ERROR']['code']);
         }
-        HospitalApi::getInstance()->apiClient('ghdjzf', ['kh'=>$cardno, 'mzh' => $mzh]);
+        $this->hospitalApi->apiClient('ghdjzf', ['kh'=>$cardno, 'mzh' => $mzh]);
         $params = [
             'out_trade_no' => $morder['out_trade_no'],
             'out_refund_no' => $morder['out_trade_no'] . 'R',
@@ -109,7 +109,7 @@ class Robot extends BaseServer
             OrderModel::getInstance()->updateOrderStatus($morder['id'], 5);
         } else {
             OrderModel::getInstance()->updateOrderStatus($morder['id'], 4);
-            throw new \Exception('快速退款失败，将转由人工处理', 220);
+            throw new \Exception('快速退款失败，将转由人工处理', Feedback::$Exception['SERVICE_API_ERROR']['code']);
         }
         return true;
     }
@@ -117,13 +117,11 @@ class Robot extends BaseServer
     /**
      * 获取医院科室列表
      * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Julibo\Msfoole\Exception
      */
-    public function getDepartment() : array
+    public function getDepartment()
     {
         $result = [];
-        $response = HospitalApi::getInstance()->apiClient('ksxx');
+        $response = $this->hospitalApi->apiClient('ksxx');
         if (!empty($response) && !empty($response['item'])) {
             $result = $response['item'];
         }
@@ -134,16 +132,15 @@ class Robot extends BaseServer
      * 获取科室号源列表
      * @param null $ksbm
      * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Julibo\Msfoole\Exception
+     * @throws \Exception
      */
-    public function getSourceList($ksbm = null) : array
+    public function getSourceList($ksbm = null)
     {
         $result = [];
         if (empty($ksbm)) {
-            throw new \Exception('缺少必要的参数', 200);
+            throw new \Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
-        $response = HospitalApi::getInstance()->apiClient('ysxx', ['ksbm'=>$ksbm]);
+        $response = $this->hospitalApi->apiClient('ysxx', ['ksbm'=>$ksbm]);
         if (!empty($response) && !empty($response['item'])) {
             $result = $response['item'];
         }
@@ -167,11 +164,11 @@ class Robot extends BaseServer
     public function createRegOrder($cardno, $ysbh, $bb, $zfje, $zfzl, $body, $token, $ip)
     {
         if (empty($cardno) || empty($ysbh) || empty($bb) || empty($zfje) || empty($zfzl)) {
-            throw new Exception('缺少必要的参数', 200);
+            throw new \Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         $orderData = OrderModel::getInstance()->createRegOrder($cardno, $ysbh, $bb, $zfje, $zfzl, $body, $ip, 1, 1, 1, $token);
         if ($orderData == false) {
-            throw new Exception('订单创建失败', 210);
+            throw new Exception('订单创建失败', Feedback::$Exception['SERVICE_SQL_ERROR']['code']);
         }
         $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
         $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
@@ -183,8 +180,6 @@ class Robot extends BaseServer
     /**
      * 挂号单处理
      * @param array $order
-     * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function regOrderHandle(array $order)
     {
@@ -228,8 +223,6 @@ class Robot extends BaseServer
     /**
      * 门诊缴费处理
      * @param array $order
-     * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function payOrderHandle(array $order)
     {
@@ -274,6 +267,7 @@ class Robot extends BaseServer
      * 支付回调
      * @param $xml
      * @return string
+     * @throws Exception
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function callbackWFT($xml)
@@ -312,10 +306,8 @@ class Robot extends BaseServer
      * @param string $orderNo
      * @param int $orderID
      * @return bool
-     * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function register(array $info, string $orderNo, int $orderID)
+    private function register(array $info, $orderNo, $orderID)
     {
         $result = false;
         $content = [
@@ -326,14 +318,14 @@ class Robot extends BaseServer
             "zfzl" => $info['zfzl'],
             "sjh" => $orderNo
         ];
-        Log::debug('register:预约挂号发起--{message}', ['message' => json_encode($content)]);
-        $response = HospitalApi::getInstance()->apiClient('ghdj', $content);
+        Log::info('register:预约挂号发起--{message}', ['message' => json_encode($content)]);
+        $response = $this->hospitalApi->apiClient('ghdj', $content);
         if (!empty($response['item']['mzh'])) {
-            Log::debug('register:预约挂号成功--{message}', ['message' => json_encode($content)]);
+            Log::info('register:预约挂号成功--{message}', ['message' => json_encode($content)]);
             OrderModel::getInstance()->updateOrderStatus($orderID, 2, $response['item']['mzh']);
             $result = $response['item']['mzh'];
         } else {
-            Log::debug('register:预约挂号失败--{message}', ['message' => json_encode($content)]);
+            Log::info('register:预约挂号失败--{message}', ['message' => json_encode($content)]);
             OrderModel::getInstance()->updateOrderStatus($orderID, 3);
         }
         return $result;
@@ -344,10 +336,8 @@ class Robot extends BaseServer
      * @param array $info
      * @param int $orderID
      * @return bool
-     * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function payment(array $info, int $orderID)
+    private function payment(array $info, $orderID)
     {
         $result = false;
         $content = [
@@ -356,14 +346,14 @@ class Robot extends BaseServer
             "zfzl" => $info['zfzl'],
             "sjh" => $info['sjh']
         ];
-        Log::debug('register:门诊缴费发起--{message}', ['message' => json_encode($content)]);
-        $response = HospitalApi::getInstance()->apiClient('mzsf', $content);
+        Log::info('payment:门诊缴费发起--{message}', ['message' => json_encode($content)]);
+        $response = $this->hospitalApi->apiClient('mzsf', $content);
         if (!empty($response) && !empty($response['item'])) {
-            Log::debug('register:门诊缴费成功--{message},返回记录--{response}', ['message' => json_encode($content), 'response'=>json_encode($response)]);
+            Log::info('payment:门诊缴费成功--{message},返回记录--{response}', ['message' => json_encode($content), 'response'=>json_encode($response)]);
             OrderModel::getInstance()->updateOrderStatus($orderID, 2, $response['item']['skbs']);
             $result = $response['item'];
         } else {
-            Log::debug('register:门诊缴费失败--{message},返回记录--{response}', ['message' => json_encode($content), 'response'=>json_encode($response)]);
+            Log::info('register:门诊缴费失败--{message},返回记录--{response}', ['message' => json_encode($content), 'response'=>json_encode($response)]);
             OrderModel::getInstance()->updateOrderStatus($orderID, 3);
         }
         return $result;
@@ -376,7 +366,7 @@ class Robot extends BaseServer
      * @throws Exception
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public static function sendSms(string $cardNo, string $content)
+    public static function sendSms($cardNo, $content)
     {
         $user = HospitalApi::getInstance()->getUser($cardNo);
         if (!empty($user) && !empty($content) && !empty($user['mobile']) && preg_match("/^1[3456789]\d{9}$/", $user['mobile'])) {
@@ -389,39 +379,41 @@ class Robot extends BaseServer
      * 通过卡号查询缴费列表
      * @param string $cardNo
      * @return array
-     * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getPayment(string $cardNo)
+    public function getPayment($cardNo)
     {
         $result = [];
-        $response = HospitalApi::getInstance()->apiClient('getjfmx', ['kh'=>$cardNo]);
+        $response = $this->hospitalApi->apiClient('getjfmx', ['kh'=>$cardNo]);
         if (!empty($response) && !empty($response['item'])) {
             $result = $response['item'];
+            foreach ($result as &$vo) {
+                $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
+                $vo['je'] = sprintf('￥%s', $vo['je']);
+            }
         }
         return $result;
     }
 
     /**
      * 创建门诊缴费订单
-     * @param $cardNo 卡号
-     * @param $mzh 门诊号
-     * @param $zfje 支付金额
-     * @param $zfzl 支付种类
-     * @param $body 描述
-     * @param $ip IP地址
-     * @param $token 客户标识
+     * @param string $cardNo 卡号
+     * @param string $mzh 门诊号
+     * @param float $zfje 支付金额
+     * @param int $zfzl 支付种类
+     * @param string $body 描述
+     * @param string $ip IP地址
+     * @param string $token 客户标识
      * @return mixed
      * @throws Exception
      */
     public function createPayOrder($cardNo, $mzh, $zfje, $zfzl, $body, $ip, $token)
     {
         if (empty($cardNo) || empty($mzh) || empty($zfje) || empty($zfzl) || empty($body) || empty($ip) || empty($token)) {
-            throw new Exception('缺少必要的参数', 200);
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         $orderData = OrderModel::getInstance()->createPayOrder($cardNo, $mzh, $zfje, $zfzl, $body, $ip, 1, 1, $token);
         if ($orderData == false) {
-            throw new Exception('订单创建失败', 210);
+            throw new Exception('订单创建失败', Feedback::$Exception['SERVICE_SQL_ERROR']);
         }
         $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
         $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
@@ -438,20 +430,19 @@ class Robot extends BaseServer
      * @param float $zfje 支付金额
      * @return bool
      * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function cancelPay(string $cardNo, string $orderID, string $skbs, float $zfje)
+    public function cancelPay($cardNo, $orderID, $skbs, $zfje)
     {
         if (empty($cardNo) || empty($orderID) || empty($skbs) || empty($zfje)) {
-            throw new \Exception('缺少必要的参数', 200);
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         # 取得订单
         $orderResult = OrderModel::getInstance()->getOrderByTradeNo($orderID);
         if (empty($orderResult) || $orderResult['user'] != $cardNo || $orderResult['total_fee'] != $zfje * 100 ||
             $orderResult['code'] != $skbs) {
-            throw new Exception('订单不存在或无权操作', 210);
+            throw new Exception(Feedback::$Exception['SERVICE_AUTH_ERROR']['msg'], Feedback::$Exception['SERVICE_AUTH_ERROR']['code']);
         }
-        HospitalApi::getInstance()->apiClient('qxmzsf', ['skbs'=>$skbs, 'zfje' => $zfje]);
+        $this->hospitalApi->apiClient('qxmzsf', ['skbs'=>$skbs, 'zfje' => $zfje]);
         $params = [
             'out_trade_no' => $orderID,
             'out_refund_no' => $orderID . 'R',
@@ -465,7 +456,7 @@ class Robot extends BaseServer
             OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 5);
         } else {
             OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 4);
-            throw new Exception('快速退款失败，将转由人工处理', 220);
+            throw new Exception('快速退款失败，将转由人工处理', Feedback::$Exception['SERVICE_API_ERROR']['code']);
         }
         return true;
     }
@@ -504,7 +495,7 @@ class Robot extends BaseServer
                 'type' => 2,
                 'class' => self::class,
                 'method' => 'sendSms',
-                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'预约挂号成功，欢迎准时就诊']
+                'parameter' => ['cardno'=>$info['kh'], 'content'=>'预约挂号成功，欢迎准时就诊']
             ];
             Channel::instance()->push($sms);
             OrderModel::getInstance()->updateOrderStatus($order['id'], 2, $responseQh['mzh']);
@@ -513,7 +504,7 @@ class Robot extends BaseServer
                 'type' => 2,
                 'class' => static::class,
                 'method' => 'sendSms',
-                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'预约挂号失败，挂号费将按原路返回']
+                'parameter' => ['cardno'=>$info['kh'], 'content'=>'预约挂号失败，挂号费将按原路返回']
             ];
             Channel::instance()->push($sms);
             // 原路返回
