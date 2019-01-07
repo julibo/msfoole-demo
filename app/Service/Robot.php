@@ -21,16 +21,13 @@ class Robot extends BaseServer
 
     protected function init()
     {
-        // TODO: Implement init() method.
         $this->hospitalApi = HospitalApi::getInstance();
     }
 
     /**
      * websocket 登陆
      * @param array $params
-     * @return array|bool
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Julibo\Msfoole\Exception
+     * @return bool
      */
     public function login(array $params)
     {
