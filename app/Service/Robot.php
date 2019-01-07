@@ -180,8 +180,6 @@ class Robot extends BaseServer
     /**
      * 挂号单处理
      * @param array $order
-     * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function regOrderHandle(array $order)
     {

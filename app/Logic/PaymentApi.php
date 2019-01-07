@@ -59,7 +59,7 @@ class PaymentApi
     public function createOrder(array $param, int $service)
     {
         try {
-            Log::debug('Refund:订单创建开始：{message}', ['message'=>json_encode($param)]);
+            Log::info('Refund:订单创建开始：{message}', ['message'=>json_encode($param)]);
             $this->reqHandler->setReqParams($param,array('method'));
             switch ($service) {
                 case 1:
@@ -72,7 +72,8 @@ class PaymentApi
             $this->reqHandler->setParameter('mch_id',$this->cfg['mchid']); //必填项，商户号，由威富通分配
             $this->reqHandler->setParameter('version',$this->cfg['version']);
             $this->reqHandler->setParameter('sign_type',$this->cfg['sign_type']);
-            $this->reqHandler->setParameter('limit_credit_pay', Config::get('pay.weifutong.limit_credit_pay'));
+            $this->reqHandler->setParameter('op_user_id',$this->cfg['op_user_id']);//必填项，操作员帐号,默认为商户号
+            $this->reqHandler->setParameter('limit_credit_pay', $this->cfg['limit_credit_pay']);
 
             //通知地址，必填项，接收威富通通知的URL，需给绝对路径，255字符内格式如:http://wap.tenpay.com/tenpay.asp
             $this->reqHandler->setParameter('notify_url',$this->cfg['notify_url']);
@@ -99,7 +100,7 @@ class PaymentApi
                 throw new Exception($this->pay->getErrInfo(), 560);
             }
         } catch (\Throwable $e) {
-            Log::error('PayCode:二维码创建失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
+            Log::info('PayCode:二维码创建失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
         }
     }
 
@@ -167,7 +168,7 @@ class PaymentApi
                 throw new Exception($this->pay->getErrInfo(), 530);
             }
         } catch (\Throwable $e) {
-            Log::error('Refund:退款提交失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
+            Log::info('Refund:退款提交失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
             return false;
         }
     }
