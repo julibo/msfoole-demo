@@ -20,12 +20,9 @@ class Robot extends BaseServer
 {
     private $hospitalApi;
 
-    private $paymentApi;
-
     protected function init()
     {
         $this->hospitalApi = HospitalApi::getInstance();
-        $this->paymentApi = PaymentApi::getInstance();
     }
 
     /**
@@ -71,8 +68,11 @@ class Robot extends BaseServer
          $response = $this->hospitalApi->apiClient('ghxx', ['kh'=>$cardno]);
          if (!empty($response) && !empty($response['item'])) {
              foreach ($response['item'] as $vo) {
-                 if ($vo['yfsfy'] == "False")
+                 if ($vo['yfsfy'] == "False") {
+                     $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
+                     $vo['hj'] = sprintf('￥%s', $vo['hj']);
                      array_push($result, $vo);
+                 }
              }
          }
          return $result;
@@ -172,7 +172,7 @@ class Robot extends BaseServer
         }
         $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
         $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
-        $weixinResult = $this->paymentApi->createOrder($orderData, $zfzl);
+        $weixinResult = PaymentApi::getInstance()->createOrder($orderData, $zfzl);
         $result = $weixinResult['code_img_url'];
         return $result;
     }
@@ -272,7 +272,7 @@ class Robot extends BaseServer
      */
     public function callbackWFT($xml)
     {
-        $payRes = $this->paymentApi->callback($xml);
+        $payRes = PaymentApi::getInstance()->callback($xml);
         if ($payRes) {
             $order = OrderModel::getInstance()->getOrderByTradeNo($payRes['orderID']);
             if ($order && $order['total_fee'] == $payRes['totalFee']) {
@@ -386,6 +386,10 @@ class Robot extends BaseServer
         $response = $this->hospitalApi->apiClient('getjfmx', ['kh'=>$cardNo]);
         if (!empty($response) && !empty($response['item'])) {
             $result = $response['item'];
+            foreach ($result as &$vo) {
+                $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
+                $vo['je'] = sprintf('￥%s', $vo['je']);
+            }
         }
         return $result;
     }
@@ -413,7 +417,7 @@ class Robot extends BaseServer
         }
         $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
         $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
-        $payResult = $this->paymentApi->createOrder($orderData, $zfzl);
+        $payResult = PaymentApi::getInstance()->createOrder($orderData, $zfzl);
         $result = $payResult['code_img_url'];
         return $result;
     }
@@ -447,7 +451,7 @@ class Robot extends BaseServer
             'refund_channel' => 'ORIGINAL',
             'nonce_str' => Helper::guid()
         ];
-        $refundResult = $this->paymentApi->submitRefund($params);
+        $refundResult = PaymentApi::getInstance()->submitRefund($params);
         if ($refundResult) {
             OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 5);
         } else {
