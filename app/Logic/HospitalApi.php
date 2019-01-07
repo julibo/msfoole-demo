@@ -61,15 +61,16 @@ class HospitalApi
             'content' => $content
         ];
         $body = json_encode($body);
+        $time = microtime(true);
         Log::debug('HospitalApi:发起请求，入参：{body}', ['body'=>$body]);
         $response = $this->client->request('POST', $this->apiHost, [
             'body' => $body
         ]);
         $data = $response->getBody();
         $data = json_decode($data, true);
-        Log::debug('HospitalApi:获取结果，入参：{body}，接口返回：{data}', ['body'=>$body, 'data'=>json_encode($data)]);
+        Log::info('HospitalApi:获取结果，入参：{body}，接口返回：{data}，耗时：{time}秒', ['body'=>$body, 'data'=>json_encode($data), 'time'=>microtime(true) - $time]);
         if (empty($data) || !isset($data['errorcode']) || !isset($data['response'])) {
-            throw new Exception(Feedback::$Exception['INTERFACE_EXCEPTION_API']['msg'], Feedback::$Exception['INTERFACE_EXCEPTION_API']['code']);
+            throw new Exception(Feedback::$Exception['INTERFACE_EXCEPTION']['msg'], Feedback::$Exception['INTERFACE_EXCEPTION']['code']);
         }
         if ($data['errorcode'] != 0) {
             throw new Exception($data['msg'], $data['errorcode']);
@@ -93,7 +94,6 @@ class HospitalApi
         if (preg_match("/^1[3456789]\d{9}$/", $result['dh'])) {
             $result['mobile'] = $result['dh'];
         }
-        $result['mobile'] = '18140106050';
         return $result;
     }
 }

@@ -17,10 +17,12 @@ use App\Lib\Helper\Message;
 
 class Robot extends BaseServer
 {
+    private $hospitalApi;
 
     protected function init()
     {
         // TODO: Implement init() method.
+        $this->hospitalApi = HospitalApi::getInstance();
     }
 
     /**
@@ -53,7 +55,7 @@ class Robot extends BaseServer
                 return false;
             }
         }
-        $user = HospitalApi::getInstance()->getUser($cardno);
+        $user = $this->hospitalApi->getUser($cardno);
         return $user;
     }
 

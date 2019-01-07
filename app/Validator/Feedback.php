@@ -24,7 +24,6 @@ class Feedback
         'PARAMETER_LENGTH_SHORT' => ['code' => 54, 'msg' => '参数长度太短'],
         'PARAMETER_OUT_RANGE' => ['code' => 55, 'msg' => '参数超出范围'],
         // 其他异常
-        'INTERFACE_EXCEPTION_API' => ['code' => 90, 'msg' => 'API接口异常'],
         'INTERFACE_EXCEPTION' => ['code' => 90, 'msg' => 'API接口异常'],
 
     ];
