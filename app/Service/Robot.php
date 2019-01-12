@@ -471,7 +471,7 @@ class Robot extends BaseServer
     {
         $result = false;
         $info = json_decode($order['info'], true);
-        $responseDj = HospitalApi::getInstance()->apiClient('yydj', [
+        $responseDj = $this->hospitalApi->apiClient('yydj', [
             'kh' => $info['kh'],
             'ysbh' => $info['ysbh'],
             'zzks' => $info['zzks'],
@@ -480,7 +480,7 @@ class Robot extends BaseServer
             'ysh_lx' => $info['ysh_lx'],
         ]);
         if (!empty($responseDj) && $responseDj['hybh']) {
-            $responseQh = HospitalApi::getInstance()->apiClient('yydj_qh', [
+            $responseQh = $this->hospitalApi->apiClient('yydj_qh', [
                 'hybh' => $responseDj['hybh'],
                 'sjh' => $order['out_trade_no'],
                 'zfzl' => $info['zfzl'],
@@ -521,9 +521,8 @@ class Robot extends BaseServer
                 OrderModel::getInstance()->updateOrderStatus($order['id'], 5);
             } else {
                 OrderModel::getInstance()->updateOrderStatus($order['id'], 4);
-                throw new Exception('快速退款失败，将转由人工处理', 220);
+                throw new Exception('快速退款失败，将转由人工处理', Feedback::$Exception['SERVICE_API_ERROR']['code']);
             }
         }
     }
-
 }

@@ -4,50 +4,49 @@
  */
 namespace App\Service;
 
-use Julibo\Msfoole\Facade\Config;
-use Julibo\Msfoole\Cache;
 use Julibo\Msfoole\Exception;
 use Julibo\Msfoole\Helper;
 use App\Lib\Helper\Message;
 use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
+use App\Validator\Feedback;
 use App\Model\Order as OrderModel;
-
 
 class Sale extends BaseServer
 {
+    private $hospitalApi;
+
+    public $cache;
 
     protected function init()
     {
         // TODO: Implement init() method.
+        $this->hospitalApi = HospitalApi::getInstance();
     }
 
     /**
-     *  通过卡号或手机号查询用户
+     * 通过卡号或手机号查询用户
      * 查询到用户信息，将用户信息缓存起来
      * @param $number
      * @return bool
      * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getCode($number) : bool
     {
         // 通过卡号或手机号查询用户
-        $user = HospitalApi::getInstance()->getUser($number);
+        $user = $this->hospitalApi->getUser($number);
         // 将用户和随机码缓存起来
         if (empty($user['mobile'])) {
-            throw new Exception('手机号码没有绑定', 88);
+            throw new Exception('没有绑定手机号码', Feedback::$Exception['SERVICE_DATA_ERROR']['code']);
         }
         $code = rand(1000,9999);
         $msgResult = Message::sendSms($user['mobile'], sprintf("您正在使用手机认证登录服务，您的短信验证码为%s。验证码切勿告知他人，以免造成不必要的困扰，此验证码10分钟内有效。", $code));
-        $cacheConfig = Config::get('cache.default') ?? [];
-        $cache = new Cache($cacheConfig);
         $info = [
             'user' => $user,
             'code' => $code,
         ];
-        $cache->set($number, $info, 600);
-        return $msgResult > 0 ? true : false;
+        $this->cache->set($number, $info, 600);
+        return $msgResult ? true : false;
     }
 
     /**
@@ -55,17 +54,13 @@ class Sale extends BaseServer
      * @param $number
      * @param $code
      * @return array
-     * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function login($number, $code) : array
     {
         $result = [];
-        $cacheConfig = Config::get('cache.default') ?? [];
-        $cache = new Cache($cacheConfig);
-        $user = $cache->get($number);
+        $user = $this->cache->get($number);
         if (!empty($user) && $user['code'] == $code) {
-            $result = HospitalApi::getInstance()->getUser($number);
+            $result = $user['user'];
         }
         return $result;
     }
@@ -75,20 +70,27 @@ class Sale extends BaseServer
      * @param string $cardNo
      * @return array
      * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getRecord(string $cardNo)
+    public function getRecord(string $cardNo) : array
     {
-        $result = [];
-        $response = HospitalApi::getInstance()->apiClient('yydjcx', ['kh'=>$cardNo]);
-        if (!empty($response) && !empty($response['item'])) {
-            $result = $response['item'];
+        try {
+            $result = [];
+            $response = $this->hospitalApi->apiClient('yydjcx', ['kh'=>$cardNo]);
+            if (!empty($response) && !empty($response['item'])) {
+                $result = $response['item'];
+            }
+            return $result;
+        } catch (\Exception $e) {
+            if ($e->getCode() == 1) {
+                return [];
+            } else {
+                throw new Exception($e->getMessage(), $e->getCode());
+            }
         }
-        return $result;
     }
 
     /**
-     * 取消预约
+     * 取消预约 ？？？？？
      * @param string $hybh
      * @param string $sjh
      * @return bool
@@ -153,14 +155,17 @@ class Sale extends BaseServer
 
     /**
      * 获取号源
-     * @param $ksbm
+     * @param string $ksbm
      * @param null $appoint
      * @return array
      * @throws Exception
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getSource($ksbm, $appoint = null)
+    public function getSource($ksbm, $appoint = null) : array
     {
+        if (empty($ksbm)) {
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
         if (empty($appoint)) {
             $kssj = date('Y-m-d', strtotime('1 days'));
             $jssj = date('Y-m-d', strtotime('7 days'));
@@ -223,15 +228,14 @@ class Sale extends BaseServer
      * @param $ysh_lx
      * @return array|string
      * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function checkIn($kh, $ysbh, $zzks, $ghrq, $ghlb, $ysh_lx)
     {
         if (empty($kh) || empty($ysbh) || empty($zzks) || empty($ghrq) || empty($ghlb) || empty($ysh_lx)) {
-            throw new Exception('缺少必要的参数', 22);
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         $result = '';
-        $response = HospitalApi::getInstance()->apiClient('yydj', [
+        $response = $this->hospitalApi->apiClient('yydj', [
             'kh' => $kh,
             'ysbh' => $ysbh,
             'zzks' => $zzks,
@@ -253,15 +257,14 @@ class Sale extends BaseServer
      * @param $zfje
      * @return string
      * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function receiveNo($hybh, $sjh, $zfzl, $zfje)
     {
         if (empty($hybh) || empty($sjh) || empty($zfzl) || empty($zfje)) {
-            throw new Exception('缺少必要的参数', 22);
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         $result = '';
-        $response = HospitalApi::getInstance()->apiClient('yydj_qh', [
+        $response = $this->hospitalApi->apiClient('yydj_qh', [
             'hybh' => $hybh,
             'sjh' => $sjh,
             'zfzl' => $zfzl,
@@ -292,11 +295,11 @@ class Sale extends BaseServer
     {
         if (empty($cardNo) || empty($ysbh) || empty($zzks) || empty($ghrq) || empty($ghlb) || empty($ysh_lx) ||
             empty($body) || empty($ip) || empty($zfje)) {
-            throw new Exception('缺少必要的参数', 20);
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         $orderData = OrderModel::getInstance()->createSaleOrder($cardNo, $ysbh, $zzks, $ghrq, $ghlb, $ysh_lx, $zfzl, $zfje, $body, $ip);
         if ($orderData == false) {
-            throw new Exception('订单创建失败', 21);
+            throw new Exception(Feedback::$Exception['SERVICE_SQL_ERROR']['msg'], Feedback::$Exception['SERVICE_SQL_ERROR']['code']);
         }
         $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
         $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
@@ -318,7 +321,7 @@ class Sale extends BaseServer
     public function getOrder($cardNo, $tradeNo)
     {
         if (empty($cardNo) || empty($tradeNo)) {
-            throw new Exception('缺少必要的参数', 22);
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         $result = OrderModel::getInstance()->getOrderByTradeAndCard($cardNo, $tradeNo);
         return $result;

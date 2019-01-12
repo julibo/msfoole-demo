@@ -27,6 +27,7 @@ class Feedback
         'SERVICE_SQL_ERROR' => ['code' => 60, 'msg' => '业务流程sql异常'],
         'SERVICE_AUTH_ERROR' => ['code' => 61, 'msg' => '业务流程权限异常'],
         'SERVICE_API_ERROR' => ['code' => 62, 'msg' => '业务流程接口异常'],
+        'SERVICE_DATA_ERROR' => ['code' => 63, 'msg' => '业务流程数据异常'],
         // 其他异常
         'INTERFACE_EXCEPTION' => ['code' => 90, 'msg' => 'API接口异常'],
 

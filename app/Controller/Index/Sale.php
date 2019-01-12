@@ -10,9 +10,12 @@ use App\Service\Sale as SaleService;
 
 class Sale extends BaseController
 {
+    private $server;
+
     protected function init()
     {
-        // TODO: Implement init() method.
+        $this->server = SaleService::getInstance();
+        $this->server->cache = $this->cache;
     }
 
     /**
@@ -31,12 +34,12 @@ class Sale extends BaseController
      public function index()
      {
          $cardNo = $this->user['cardno'] ?? null;
-         $result = SaleService::getInstance()->getRecord($cardNo);
+         $result = $this->server->getRecord($cardNo);
          return $result;
      }
 
     /**
-     * 取消预约
+     * 取消预约 ？？？？
      */
     public function cancel()
     {
@@ -51,7 +54,7 @@ class Sale extends BaseController
      */
     public function getOffices()
     {
-        $result = SaleService::getInstance()->getDepartment();
+        $result = $this->server->getDepartment();
         return $result;
     }
 
@@ -62,7 +65,7 @@ class Sale extends BaseController
     {
         $appoint = $this->params['appoint'] ?? null;
         $ksbm = $this->params['ksbm'] ?? null;
-        $result = SaleService::getInstance()->getSource($ksbm, $appoint);
+        $result = $this->server->getSource($ksbm, $appoint);
         return $result;
     }
 
@@ -90,7 +93,7 @@ class Sale extends BaseController
         $ghrq = $this->params['ghrq'] ?? null;
         $ghlb = $this->params['ghlb'] ?? null;
         $ysh_lx = $this->params['ysh_lx'] ?? null;
-        $result = SaleService::getInstance()->checkIn($kh, $ysbh, $zzks, $ghrq, $ghlb, $ysh_lx);
+        $result = $this->server->checkIn($kh, $ysbh, $zzks, $ghrq, $ghlb, $ysh_lx);
         return $result;
     }
 
