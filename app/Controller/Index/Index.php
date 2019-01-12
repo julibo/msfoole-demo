@@ -3,8 +3,6 @@ namespace App\Controller\Index;
 
 use Julibo\Msfoole\HttpController as BaseController;
 use App\Service\Sale as SaleService;
-use Julibo\Msfoole\Facade\Config;
-use Julibo\Msfoole\Cache;
 
 class Index extends BaseController
 {

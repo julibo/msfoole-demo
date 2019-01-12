@@ -495,7 +495,7 @@ class Robot extends BaseServer
                 'type' => 2,
                 'class' => self::class,
                 'method' => 'sendSms',
-                'parameter' => ['cardno'=>$info['kh'], 'content'=>'预约挂号成功，欢迎准时就诊']
+                'parameter' => ['cardno'=>$info['kh'], 'content'=>'预约挂号成功，欢迎按时就诊']
             ];
             Channel::instance()->push($sms);
             OrderModel::getInstance()->updateOrderStatus($order['id'], 2, $responseQh['mzh']);
