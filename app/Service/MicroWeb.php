@@ -410,7 +410,18 @@ class MicroWeb extends BaseServer
         return $result;
     }
 
-
+    /**
+     * 创建门诊缴费订单
+     * @param $openid
+     * @param $cardNo
+     * @param $mzh
+     * @param $je
+     * @param $is_raw
+     * @param $body
+     * @param $ip
+     * @return array|bool
+     * @throws Exception
+     */
     public function createPayOrder($openid, $cardNo, $mzh, $je, $is_raw, $body, $ip)
     {
         if (empty($openid) || empty($cardNo) || empty($mzh) || empty($je) || !isset($is_raw)) {
@@ -437,8 +448,108 @@ class MicroWeb extends BaseServer
             ];
         }
         return $result;
+    }
 
+    /**
+     * 获取报告
+     * @param $cardNo
+     * @return array|mixed
+     * @throws Exception
+     */
+    public function report($cardNo)
+    {
+        if (empty($cardNo)) {
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
+//        $result = [];
+//        $responseCheck = $this->hospitalApi->apiClient('jcxx', ['kh' => $cardNo]);
+//        if (!empty($responseCheck) && !empty($responseCheck['item'])) {
+//            $result['check'] = $responseCheck['item'];
+//        } else {
+//            $result['check'] = [];
+//        }
+//        $responseTest = $this->hospitalApi->apiClient('jyxx', ['kh' => $cardNo]);
+//        if (!empty($responseTest) && !empty($responseTest['item'])) {
+//            $result['test'] = $responseTest['item'];
+//        } else {
+//            $result['test'] = [];
+//        }
+        $value = '{"check":[{"mzh":"1812260003","ysxm":"\u9ad8\u667a\u4e09","jcxm":[{"jcxmmc":"\u4e24\u90e8\u4f4dB\u8d85","kdxh":"1949","jcjg":[{"zd":"\u53cc\u819d\u5173\u8282\u5404\u9aa8\u9aa8\u8d28\u672a\u89c1\u660e\u663e\u9aa8\u6298\u5f81\u8c61\u3002","jg":"\u9634\u6027","zdnr":"\u53cc\u819d\u5173\u8282\u5404\u9aa8\u9aa8\u8d28\u7ed3\u6784\u5b8c\u6574\uff0c\u9aa8\u76ae\u8d28\u8fde\u7eed\uff0c\u9aa8\u7eb9\u7406\u6e05\u6670\uff0c\u672a\u89c1\u9aa8\u8d28\u589e\u751f\u53ca\u7834\u574f\u5f81\u8c61\uff0c\u672a\u89c1\u9aa8\u6298\u5f81\u8c61\u3002","jcfs":"","jcbw":"\u53f3\u819d\u5173\u8282\u6444\u7247,\u5de6\u819d\u5173\u8282\u6444\u7247,"}]},{"jcxmmc":"\u4e09\u90e8\u4f4dB\u8d85","kdxh":"1950","jcjg":""}],"ghrq":"2018-12-26 00:00:00","byxm":"\u5218\u9752\u6d0b"}],"test":[{"mzh":"1812260003","ysxm":"\u9ad8\u667a\u4e09","jyxm":[{"jytmh":"180918000001870002","jyxmmc":"\u7535\u89e3\u8d28","shjg":"","jyjg":""},{"jytmh":"170513000582570004","jyxmmc":"\u809d\u529f","shjg":"","jyjg":[{"ITEMNAME":"\u51dd\u8840\u9176\u539f\u65f6\u95f4","SAMPLE_GROUP_NAME":"\u2605\u8840\u51dd\u2605","SAMPLE_GROUP_CODE":"40090","RESULT_STATUS":"","PATIENT_ID":"1812260003","SERIALNO":"170513000582570004","INSPECTION_DATE":"2017\/5\/14","SAMPLE_NO":"1","VISIT_ID":"1812260003","ITEMNO":"40010","RESULT":"10.5","REFRANGE":"10-16","UNIT":"S"},{"ITEMNAME":"\u56fd\u9645\u6807\u51c6\u5316\u6bd4\u503c","SAMPLE_GROUP_NAME":"\u2605\u8840\u51dd\u2605","SAMPLE_GROUP_CODE":"40090","RESULT_STATUS":"","PATIENT_ID":"1812260003","SERIALNO":"170513000582570004","INSPECTION_DATE":"2017\/5\/14","SAMPLE_NO":"1","VISIT_ID":"1812260003","ITEMNO":"40020","RESULT":"0.84","REFRANGE":"0.80-1.20","UNIT":""},{"ITEMNAME":"\u7ea4\u7ef4\u86cb\u767d\u539f","SAMPLE_GROUP_NAME":"\u2605\u8840\u51dd\u2605","SAMPLE_GROUP_CODE":"40090","RESULT_STATUS":"","PATIENT_ID":"1812260003","SERIALNO":"170513000582570004","INSPECTION_DATE":"2017\/5\/14","SAMPLE_NO":"1","VISIT_ID":"1812260003","ITEMNO":"40030","RESULT":"2.629","REFRANGE":"2.0-4.0","UNIT":"g\/L"},{"ITEMNAME":"\u51dd\u8840\u9176\u65f6\u95f4","SAMPLE_GROUP_NAME":"\u2605\u8840\u51dd\u2605","SAMPLE_GROUP_CODE":"40090","RESULT_STATUS":"","PATIENT_ID":"1812260003","SERIALNO":"170513000582570004","INSPECTION_DATE":"2017\/5\/14","SAMPLE_NO":"1","VISIT_ID":"1812260003","ITEMNO":"40040","RESULT":"13.6","REFRANGE":"10-20","UNIT":"S"},{"ITEMNAME":"\u90e8\u5206\u6d3b\u5316\u51dd\u8840\u6d3b\u9176\u65f6\u95f4","SAMPLE_GROUP_NAME":"\u2605\u8840\u51dd\u2605","SAMPLE_GROUP_CODE":"40090","RESULT_STATUS":"","PATIENT_ID":"1812260003","SERIALNO":"170513000582570004","INSPECTION_DATE":"2017\/5\/14","SAMPLE_NO":"1","VISIT_ID":"1812260003","ITEMNO":"40050","RESULT":"27.7","REFRANGE":"22-38","UNIT":"S"},{"ITEMNAME":"D-\u4e8c\u805a\u4f53","SAMPLE_GROUP_NAME":"D-\u4e8c\u805a\u4f53","SAMPLE_GROUP_CODE":"40080","RESULT_STATUS":"","PATIENT_ID":"1812260003","SERIALNO":"170513000582570004","INSPECTION_DATE":"2017\/5\/14","SAMPLE_NO":"1","VISIT_ID":"1812260003","ITEMNO":"40080","RESULT":"0.17","REFRANGE":"0-0.40","UNIT":"mg\/L"}]}],"ghrq":"2018-12-26 00:00:00","byxm":"\u5218\u9752\u6d0b"}]}';
+        $result = json_decode($value, true);
+        return $result;
+    }
 
+    /**
+     * 检查报告详情
+     * @param $cardNo
+     * @param $mzh
+     * @param $kdxh
+     * @return array
+     * @throws Exception
+     */
+    public function reportCheck($cardNo, $mzh, $kdxh)
+    {
+        if (empty($cardNo) || empty($mzh) || empty($kdxh)) {
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
+        $result = [];
+        $report = $this->report($cardNo);
+        if (!empty($report['check'])) {
+            foreach ($report['check'] as $check) {
+                if ($check['mzh'] == $mzh) {
+                    foreach ($check['jcxm'] as $jcxm) {
+                        if ($jcxm['kdxh'] == $kdxh) {
+                            $result['byxm'] = $check['byxm'];
+                            $result['mzh'] = $check['mzh'];
+                            $result['ysxm'] = $check['ysxm'];
+                            $result['ghrq'] = $check['ghrq'];
+                            $result['jcxmmc'] = $jcxm['jcxmmc'];
+                            $result['kdxh'] = $jcxm['kdxh'];
+                            $result['jcjg'] = $jcxm['jcjg'];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * 检验详情
+     * @param $cardNo
+     * @param $mzh
+     * @param $jytmh
+     * @return array
+     * @throws Exception
+     */
+    public function reportTest($cardNo, $mzh, $jytmh)
+    {
+        if (empty($cardNo) || empty($mzh) || empty($jytmh)) {
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
+        $result = [];
+        $report = $this->report($cardNo);
+        if (!empty($report['test'])) {
+            foreach ($report['test'] as $test) {
+                if ($test['mzh'] == $mzh) {
+                    foreach ($test['jyxm'] as $jyxm) {
+                        if ($jyxm['jytmh'] == $jytmh) {
+                            $result['byxm'] = $test['byxm'];
+                            $result['ghrq'] = $test['ghrq'];
+                            $result['mzh'] = $test['mzh'];
+                            $result['ysxm'] = $test['ysxm'];
+                            $result['jytmh'] = $jyxm['jytmh'];
+                            $result['jyxmmc'] = $jyxm['jyxmmc'];
+                            $result['jyjg'] = $jyxm['jyjg'];
+                            $result['shjg'] = $jyxm['shjg'];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return $result;
     }
 
 }

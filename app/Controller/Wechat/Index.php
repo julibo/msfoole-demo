@@ -226,15 +226,39 @@ class Index extends BaseController
         return $result;
     }
 
-
-
     /**
      * 检查报告
      */
     public function report()
     {
-        $params = $this->params;
-        $result = $this->wechat->report($params);
+        $cardNo = $this->params['cardno'] ?? null;
+        $result = $this->wechat->report($cardNo);
+        return $result;
+    }
+
+    /**
+     * 检验报告详情
+     * @return mixed
+     */
+    public function reportTest()
+    {
+        $cardNo = $this->params['cardno'] ?? null;
+        $mzh = $this->params['mzh'] ?? null;
+        $jytmh = $this->params['jytmh'] ?? null;
+        $result = $this->wechat->reportTest($cardNo, $mzh, $jytmh);
+        return $result;
+    }
+
+    /**
+     * 检查报告详情
+     * @return mixed
+     */
+    public function reportCheck()
+    {
+        $cardNo = $this->params['cardno'] ?? null;
+        $mzh = $this->params['mzh'] ?? null;
+        $kdxh = $this->params['kdxh'] ?? null;
+        $result = $this->wechat->reportCheck($cardNo, $mzh, $kdxh);
         return $result;
     }
 
