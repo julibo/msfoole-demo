@@ -34,6 +34,7 @@ abstract class BaseModel
         $config = array_merge($defaultConfig, $config);
         Db::setConfig($config);
         $this->db = Db::table($table);
+        $this->init();
     }
 
     /**

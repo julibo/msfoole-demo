@@ -60,13 +60,16 @@ class PaymentApi
     {
         try {
             Log::info('Refund:订单创建开始：{message}', ['message'=>json_encode($param)]);
-            $this->reqHandler->setReqParams($param,array('method'));
+            $this->reqHandler->setReqParams($param, array('method'));
             switch ($service) {
                 case 1:
                     $this->reqHandler->setParameter('service','pay.alipay.native');
                     break;
                 case 2:
                     $this->reqHandler->setParameter('service','pay.weixin.native');
+                    break;
+                case 3:
+                    $this->reqHandler->setParameter('service', 'pay.weixin.jspay');
                     break;
             }
             $this->reqHandler->setParameter('mch_id',$this->cfg['mchid']); //必填项，商户号，由威富通分配
@@ -87,10 +90,15 @@ class PaymentApi
                 if($this->resHandler->isTenpaySign()) {
                     // 当返回状态与业务结果都为0时才返回支付二维码，其它结果请查看接口文档
                     if($this->resHandler->getParameter('status') == 0 && $this->resHandler->getParameter('result_code') == 0) {
-                        return array('code_img_url'=>$this->resHandler->getParameter('code_img_url'),
-                            'code_url'=>$this->resHandler->getParameter('code_url'),
-                            'code_status'=>$this->resHandler->getParameter('code_status'),
-                            'type'=>$this->reqHandler->getParameter('service'));
+                        if ($service == 3) {
+                            return array('pay_info'=>$this->resHandler->getParameter('pay_info'),
+                                'token_id'=>$this->resHandler->getParameter('token_id'));
+                        } else {
+                            return array('code_img_url'=>$this->resHandler->getParameter('code_img_url'),
+                                'code_url'=>$this->resHandler->getParameter('code_url'),
+                                'code_status'=>$this->resHandler->getParameter('code_status'),
+                                'type'=>$this->reqHandler->getParameter('service'));
+                        }
                     }else{
                         throw new Exception($this->resHandler->getParameter('err_msg'), 540);
                     }
@@ -101,6 +109,7 @@ class PaymentApi
             }
         } catch (\Throwable $e) {
             Log::info('PayCode:二维码创建失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
+            return false;
         }
     }
 

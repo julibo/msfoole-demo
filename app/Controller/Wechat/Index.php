@@ -1,6 +1,6 @@
 <?php
 /**
- * 微信公众号网页
+ * 微信公众号网页版
  */
 
 namespace App\Controller\Wechat;
@@ -26,12 +26,34 @@ class Index extends BaseController
     }
 
     /**
+     * 绑定就诊卡
+     */
+    public function bindCard()
+    {
+        $openid = $this->user['openid'];
+        $params = $this->params;
+        $result = $this->wechat->bindCard($openid, $params);
+        return $result;
+    }
+
+    /**
      * 我的就诊卡
      */
     public function userCard()
     {
         $openid = $this->user['openid'];
         $result = $this->wechat->userCard($openid);
+        return $result;
+    }
+
+    /**
+     * 修改默认卡片
+     */
+    public function defaultCard()
+    {
+        $openid = $this->user['openid'];
+        $id = $this->params['id'] ?? null;
+        $result = $this->wechat->defaultCard($openid, $id);
         return $result;
     }
 
@@ -56,28 +78,6 @@ class Index extends BaseController
         $openid = $this->user['openid'];
         $id = $this->params['id'] ?? null;
         $result = $this->wechat->delCard($openid, $id);
-        return $result;
-    }
-
-    /**
-     * 修改默认卡片
-     */
-    public function defaultCard()
-    {
-        $openid = $this->user['openid'];
-        $id = $this->params['id'] ?? null;
-        $result = $this->wechat->defaultCard($openid, $id);
-        return $result;
-    }
-
-    /**
-     * 绑定就诊卡
-     */
-    public function bindCard()
-    {
-        $openid = $this->user['openid'];
-        $params = $this->params;
-        $result = $this->wechat->bindCard($openid, $params);
         return $result;
     }
 
@@ -121,19 +121,81 @@ class Index extends BaseController
         return $result;
     }
 
+    /**
+     * 创建订单
+     */
+    public function createOrder()
+    {
+        $openid = $this->user['openid'];
+        $kh = $this->params['cardno'] ?? null;
+        $ysbh = $this->params['ysbh'] ?? null;
+        $zzks = $this->params['zzks'] ?? null;
+        $ghrq = $this->params['ghrq'] ?? null;
+        $ghlb = $this->params['ghlb'] ?? null;
+        $ysh_lx = $this->params['ysh_lx'] ?? null;
+        $ghf = $this->params['ghf'] ?? null;
+        $zfzl = $this->params['zfzl'] ?? null;
+        $ip = $this->user->ip ?? '127.0.0.1';
+        $body = '预约挂号费';
+        $is_raw = $this->params['is_raw'] ?? 0;
+        $zzksmc = $this->params['zzksmc'] ?? '';
+        $ysxm = $this->params['ysxm'] ?? '';
+        $result = $this->wechat->createOrder($openid, $kh, $ysbh, $ysxm, $zzks, $zzksmc, $ghrq, $ghlb, $ysh_lx, $zfzl, $ghf, $ip, $body, $is_raw);
+        return $result;
+    }
 
-
-
-
-
+    /**
+     * 查询订单状态
+     */
+    public function showRegResult()
+    {
+        $cardNo = $this->params['cardno'];
+        $orderNo = $this->params['order'] ?? null;
+        $result = $this->wechat->showRegResult($cardNo, $orderNo);
+        return $result;
+    }
 
     /**
      * 挂号记录
      */
     public function regRecord()
     {
-        $params = $this->params;
-        $result = $this->wechat->regRecord($params);
+        $openid = $this->user['openid'];
+        $result = $this->wechat->regRecord($openid);
+        return $result;
+    }
+
+    /**
+     * 挂号详情
+     */
+    public function regDetail()
+    {
+        $cardNo = $this->params['cardno'] ?? null;
+        $mzh = $this->params['mzh'] ?? null;
+        $result = $this->wechat->regDetail($cardNo, $mzh);
+        return $result;
+    }
+
+    /**
+     * 待缴门诊
+     */
+    public function payList()
+    {
+        $openid = $this->user['openid'];
+        $cardNo = $this->params['cardno'] ?? null;
+        $result = $this->wechat->payList($openid, $cardNo);
+        return $result;
+    }
+
+    /**
+     * 门诊缴费详情
+     * @return mixed
+     */
+    public function payDetail()
+    {
+        $cardNo = $this->params['cardno'] ?? null;
+        $mzh = $this->params['mzh'] ?? null;
+        $result = $this->wechat->payDetail($cardNo, $mzh);
         return $result;
     }
 
@@ -142,10 +204,29 @@ class Index extends BaseController
      */
     public function payRecord()
     {
-        $params = $this->params;
-        $result = $this->wechat->payRecord($params);
+        $openid = $this->user['openid'];
+        $result = $this->wechat->payRecord($openid);
         return $result;
     }
+
+    /**
+     * 创建缴费订单
+     * @return mixed
+     */
+    public function createPayOrder()
+    {
+        $openid = $this->user['openid'];
+        $cardNo = $this->params['cardno'] ?? null;
+        $mzh = $this->params['mzh'] ?? null;
+        $je = $this->params['je'] ?? null;
+        $is_raw = $this->params['is_raw'] ?? null;
+        $body = "门诊缴费";
+        $ip = $this->user['ip'] ?? '127.0.0.1';
+        $result = $this->wechat->createPayOrder($openid, $cardNo, $mzh, $je, $is_raw, $body, $ip);
+        return $result;
+    }
+
+
 
     /**
      * 检查报告
@@ -156,28 +237,5 @@ class Index extends BaseController
         $result = $this->wechat->report($params);
         return $result;
     }
-
-    /**
-     * 我的医生
-     */
-    public function doctor()
-    {
-        $params = $this->params;
-        $result = $this->wechat->doctor($params);
-        return $result;
-    }
-
-
-
-    /**
-     * 缴费
-     */
-    public function pay()
-    {
-        $params = $this->params;
-        $result = $this->wechat->pay($params);
-        return $result;
-    }
-
 
 }

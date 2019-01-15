@@ -34,6 +34,52 @@ class WechatCard  extends BaseModel
     }
 
     /**
+     * 绑定就诊卡
+     * @param string $openid
+     * @param array $params
+     * @return int|string
+     */
+    public function bindCard(string $openid, array $params)
+    {
+        $result = $this->db
+            ->insert([
+                'openid'  => $openid,
+                'cardno' => $params['cardno'],
+                'name' => $params['name'],
+                'idcard' => $params['idcard'],
+                'mobile' => $params['mobile'],
+                'default' => $params['default']
+            ]);
+        Log::sql("绑定就诊卡：" . $this->db->getLastSql());
+        return $result;
+    }
+
+    /**
+     * 设置默认就诊卡
+     * @param string $openid
+     * @param string $id
+     * @return int
+     * @throws \think\Exception
+     * @throws \think\db\exception\PDOException
+     */
+    public function defaultCard(string $openid, string $id)
+    {
+        $this->db
+            ->where('openid', $openid)
+            ->update([
+                'default' => 0
+            ]);
+
+        $result = $this->db
+            ->where('id', $id)
+            ->update([
+                'default' => 1
+            ]);
+        Log::sql("设置默认就诊卡：" . $this->db->getLastSql());
+        return $result;
+    }
+
+    /**
      * 查看就诊卡
      * @param string $openid
      * @param string $id
@@ -70,49 +116,14 @@ class WechatCard  extends BaseModel
         return $result;
     }
 
-    /**
-     * 设置默认就诊卡
-     * @param string $openid
-     * @param string $id
-     * @return int
-     * @throws \think\Exception
-     * @throws \think\db\exception\PDOException
-     */
-    public function defaultCard(string $openid, string $id)
-    {
-        $this->db
-            ->where('openid', $openid)
-            ->update([
-                'default' => 0
-            ]);
-        $result = $this->db
-            ->where('id', $id)
-            ->where('openid', $openid)
-            ->update([
-                'default' => 1
-            ]);
-        Log::sql("设置默认就诊卡：" . $this->db->getLastSql());
-        return $result;
-    }
 
-    /**
-     * 绑定就诊卡
-     * @param string $openid
-     * @param array $param
-     * @return int|string
-     */
-    public function bindCard(string $openid, array $params)
+    public function getDefaultCard(string $openid)
     {
         $result = $this->db
-            ->insert([
-                'openid'  => $openid,
-                'cardno' => $params['cardno'],
-                'name' => $params['name'],
-                'idcard' => $params['idcard'],
-                'mobile' => $params['mobile'],
-                'default' => $params['default']
-            ]);
-        Log::sql("绑定就诊卡：" . $this->db->getLastSql());
+            ->where('default', 1)
+            ->where('openid', $openid)
+            ->find();
+        Log::sql("查询默认就诊卡：" . $this->db->getLastSql());
         return $result;
     }
 

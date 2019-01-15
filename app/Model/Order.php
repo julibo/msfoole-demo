@@ -239,4 +239,81 @@ class Order extends BaseModel
         return $result;
     }
 
+    /**
+     * 创建微信挂号订单
+     * @param $openid
+     * @param $cardno
+     * @param $ysbh
+     * @param $zzks
+     * @param $ghrq
+     * @param $ghlb
+     * @param $ysh_lx
+     * @param $zfzl
+     * @param $zfje
+     * @param $body
+     * @param $ip
+     * @param int $group
+     * @param int $source
+     * @param int $type
+     * @return array|bool
+     */
+    public function createWechatOrder($openid, $cardno, $ysbh, $ysxm, $zzks, $zzksmc, $ghrq, $ghlb, $ysh_lx, $zfzl, $zfje, $body, $ip, $group = 4, $source = 3, $type = 1)
+    {
+        $info = ['openid' => $openid, 'kh' => $cardno, 'ysbh' => $ysbh, 'ysxm' => $ysxm, 'zzks' => $zzks, 'zzksmc' => $zzksmc, 'ghrq'=>$ghrq, 'ghlb'=>$ghlb, 'ysh_lx'=>$ysh_lx, 'zfje' => $zfje, 'zfzl'=> $zfzl];
+        $nonce_str = Helper::guid();
+        $orderID = $this->getOrderID($cardno);
+        $data = [
+            'out_trade_no' => $orderID,
+            'user' => $cardno,
+            'group' => $group,
+            'info' => json_encode($info),
+            'type' => $type,
+            'source' => $source,
+            'method' => $zfzl,
+            'body' => $body,
+            'total_fee' => $zfje * 100,
+            'mch_create_ip' => $ip,
+            'time_start' => date('Y-m-d H:i:s'),
+            'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
+            'nonce_str' => $nonce_str,
+        ];
+        $insertResult = $this->db->data($data)->insert();
+        Log::sql("创建预约挂号订单：" . $this->db->getLastSql());
+        if ($insertResult) {
+            return $data;
+        } else {
+            return false;
+        }
+    }
+
+
+    public function createWechatPayOrder($openid, $cardNo, $mzh, $zfje, $zfzl, $body, $ip, $group = 5, $source = 3, $type = 1)
+    {
+        $nonce_str = Helper::guid();
+        $orderID = $this->getOrderID($cardNo);
+        $info = ['openid' => $openid, 'kh' => $cardNo, 'mzh' => $mzh, 'zfje' => $zfje, 'zfzl'=> $zfzl, 'sjh' => $orderID];
+        $data = [
+            'out_trade_no' => $orderID,
+            'user' => $cardNo,
+            'group' => $group,
+            'info' => json_encode($info),
+            'type' => $type,
+            'source' => $source,
+            'method' => $zfzl,
+            'body' => $body,
+            'total_fee' => $zfje * 100,
+            'mch_create_ip' => $ip,
+            'time_start' => date('Y-m-d H:i:s'),
+            'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
+            'nonce_str' => $nonce_str,
+        ];
+        $insertResult = $this->db->data($data)->insert();
+        Log::sql("创建微信门诊缴费订单：" . $this->db->getLastSql());
+        if ($insertResult) {
+            return $data;
+        } else {
+            return false;
+        }
+    }
+
 }
