@@ -69,7 +69,6 @@ class WechatCard  extends BaseModel
             ->update([
                 'default' => 0
             ]);
-
         $result = $this->db
             ->where('id', $id)
             ->update([
