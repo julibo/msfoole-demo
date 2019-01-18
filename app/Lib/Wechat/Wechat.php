@@ -373,7 +373,7 @@ class Wechat
      */
 	public function getRev()
 	{
-		if ($this->_receive) return $this;
+		// if ($this->_receive) return $this;
 		$postStr = !empty($this->postxml)?$this->postxml:$this->input;
 		//兼顾使用明文又不想调用valid()方法的情况
 		$this->log($postStr);

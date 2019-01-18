@@ -23,9 +23,10 @@ class Api extends BaseController
     protected function init()
     {
         $this->wechat = Wechat::getInstance();
+        $this->wechat->cache = $this->cache;
         $input = $this->request->input;
         $this->wechat->setParam($this->request->getRequestMethod(), $input);
-        $this->wechat->cache = $this->cache;
+        $this->wechat->ip = $this->request->remote_addr;
     }
 
     /**

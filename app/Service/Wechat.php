@@ -26,6 +26,11 @@ class Wechat extends BaseServer
     public $cache;
 
     /**
+     * @var
+     */
+    public $ip;
+
+    /**
      * 初始化服务
      */
     public function init()
@@ -58,7 +63,23 @@ class Wechat extends BaseServer
             return null;
         }
         if ($result == true) {
-            $this->weObj->getRev();
+            $type = $this->weObj->getRev()->getRevType();
+            switch($type) {
+                case WechatApi::EVENT_SUBSCRIBE: //  订阅
+                    $this->subscribe();
+                    break;
+                case WechatApi::EVENT_UNSUBSCRIBE: // 取消订阅
+                    $this->unsubscribe();
+                    break;
+                case WechatApi::EVENT_SCAN: // 扫描带参数二维码
+                    $this->scan();
+                    break;
+                case WechatApi::MSGTYPE_TEXT: // 文本消息
+                    $this->text();
+                    break;
+                default:
+                    $this->weObj->text("")->reply();
+               }
             return null;
         }
     }
@@ -70,7 +91,6 @@ class Wechat extends BaseServer
      */
     public function bridge(array $params)
     {
-        $_GET = $params;
         $token = $this->weObj->getOauthAccessToken();
         if ($token == false) {
             throw new Exception('换取网页授权失败', '20');
@@ -79,10 +99,11 @@ class Wechat extends BaseServer
         if ($user == false) {
             throw new Exception('拉取用户信息失败', '30');
         }
+        $user['ip'] = $this->ip;
         // 缓存用户信息
         $this->cache->set($token['access_token'], $user);
         // 用户授权成功
-        $this->jumpUrl($params['state'], $user['openid']);
+        $this->jumpUrl($params['state'], $token['access_token']);
     }
 
     /**
@@ -93,34 +114,8 @@ class Wechat extends BaseServer
      */
     public function jumpUrl(string $state, string $openid)
     {
-        $url = Config::get('wechat.baseurl');
-        switch ($state) {
-            case 'register' :
-                $url .= '/register';
-                break;
-            case 'pay' :
-                $url .= '/pay';
-                break;
-            case 'userCard' :
-                $url .= '/user/card';
-                break;
-            case 'regRecord' :
-                $url .= '/user/regRecord';
-                break;
-            case 'payRecord' :
-                $url .= '/user/payRecord';
-                break;
-            case 'report' :
-                $url .= '/user/report';
-                break;
-            case 'doctor' :
-                $url .= '/user/doctor';
-                break;
-            default:
-                $url .= '/user/index';
-                break;
-        }
-        throw new Exception($url . '?token='.$openid, 301);
+        $url = sprintf('%s/?token=%s&path=%s', Config::get('wechat.baseurl'), $openid, $state);
+        throw new Exception($url . '/?token='.$openid, 301);
     }
 
     /**
@@ -146,6 +141,10 @@ class Wechat extends BaseServer
         return $result;
     }
 
-
+    public function text()
+    {
+        $msg = $this->weObj->getRevContent();
+        $this->weObj->text($msg)->reply();
+    }
 
 }
