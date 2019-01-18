@@ -8,7 +8,6 @@ namespace App\Service;
 
 use Julibo\Msfoole\Exception;
 use Julibo\Msfoole\Facade\Config;
-use Julibo\Msfoole\Cache;
 use Julibo\Msfoole\Facade\Log;
 use App\Logic\WechatApi;
 use App\Model\WechatCard as WechatCardModel;
@@ -33,19 +32,17 @@ class Wechat extends BaseServer
     {
         $options = Config::get('wechat.option');
         $this->weObj = new WechatApi($options);
-        $cacheConfig = Config::get('cache.default') ?? [];
-        $this->cache = new Cache($cacheConfig);
     }
 
     /**
      * 参数传递
      * @param string $requestMethod
-     * @param array $param
+     * @param $input
      */
-    public function setParam(string $requestMethod, array $param)
+    public function setParam(string $requestMethod, $input)
     {
         $this->weObj->requestMethod = $requestMethod;
-        $_GET = $param;
+        $this->weObj->input = $input;
     }
 
     /**
@@ -56,12 +53,12 @@ class Wechat extends BaseServer
     public function valid($return = true)
     {
         $result = $this->weObj->valid($return);
-        if ($result === true) {
-            return $result;
-        } else if ($result === false) {
-            return $result;
-        } else {
+        if (!is_bool($result) === true) {
             echo $result;
+            return null;
+        }
+        if ($result == true) {
+            $this->weObj->getRev();
             return null;
         }
     }

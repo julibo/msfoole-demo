@@ -241,6 +241,7 @@ class Wechat
 	public $errMsg = "no access";
 	public $logcallback;
 	public $requestMethod;
+	public $input;
 
 	public function __construct($options)
 	{
@@ -283,7 +284,7 @@ class Wechat
     {
         $encryptStr="";
         if ($this->requestMethod == "POST") {
-            $postStr = file_get_contents("php://input");
+            $postStr = $this->input;
             $array = (array)simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
             $this->encrypt_type = isset($_GET["encrypt_type"]) ? $_GET["encrypt_type"]: '';
             if ($this->encrypt_type == 'aes') { //aes加密
@@ -373,7 +374,7 @@ class Wechat
 	public function getRev()
 	{
 		if ($this->_receive) return $this;
-		$postStr = !empty($this->postxml)?$this->postxml:file_get_contents("php://input");
+		$postStr = !empty($this->postxml)?$this->postxml:$this->input;
 		//兼顾使用明文又不想调用valid()方法的情况
 		$this->log($postStr);
 		if (!empty($postStr)) {

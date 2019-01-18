@@ -23,7 +23,9 @@ class Api extends BaseController
     protected function init()
     {
         $this->wechat = Wechat::getInstance();
-        $this->wechat->setParam($this->request->getRequestMethod(), $this->request->getParams());
+        $input = $this->request->input;
+        $this->wechat->setParam($this->request->getRequestMethod(), $input);
+        $this->wechat->cache = $this->cache;
     }
 
     /**
@@ -86,11 +88,6 @@ class Api extends BaseController
                                 'name' => '检查报告',
                                 'url' => $this->wechat->getOauthRedirect($callback, 'report'),
                             ),
-                            4 => array (
-                                'type' => 'view',
-                                'name' => '我的医生',
-                                'url' => $this->wechat->getOauthRedirect($callback, 'doctor'),
-                            )
                     ),
      	        ),
       	    ),
@@ -105,7 +102,7 @@ class Api extends BaseController
      */
     public function getMenu()
     {
-        $result = $this->wechat->getMenu(1,3);
+        $result = $this->wechat->getMenu();
         return $result;
     }
 
