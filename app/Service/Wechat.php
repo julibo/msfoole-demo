@@ -5,13 +5,9 @@
 
 namespace App\Service;
 
-
 use Julibo\Msfoole\Exception;
 use Julibo\Msfoole\Facade\Config;
-use Julibo\Msfoole\Facade\Log;
 use App\Logic\WechatApi;
-use App\Model\WechatCard as WechatCardModel;
-
 
 class Wechat extends BaseServer
 {
@@ -68,17 +64,8 @@ class Wechat extends BaseServer
                 case WechatApi::EVENT_SUBSCRIBE: //  订阅
                     $this->subscribe();
                     break;
-                case WechatApi::EVENT_UNSUBSCRIBE: // 取消订阅
-                    $this->unsubscribe();
-                    break;
-                case WechatApi::EVENT_SCAN: // 扫描带参数二维码
-                    $this->scan();
-                    break;
-                case WechatApi::MSGTYPE_TEXT: // 文本消息
-                    $this->text();
-                    break;
                 default:
-                    $this->weObj->text("")->reply();
+                    echo "success";
                }
             return null;
         }
@@ -101,9 +88,9 @@ class Wechat extends BaseServer
         }
         $user['ip'] = $this->ip;
         // 缓存用户信息
-        $this->cache->set($token['access_token'], $user);
+        $this->cache->set($token['openid'], $user);
         // 用户授权成功
-        $this->jumpUrl($params['state'], $token['access_token']);
+        $this->jumpUrl($params['state'], $token['openid']);
     }
 
     /**
@@ -141,10 +128,137 @@ class Wechat extends BaseServer
         return $result;
     }
 
-    public function text()
+    /**
+     * 关注后提示欢迎信息
+     */
+    public function subscribe()
     {
-        $msg = $this->weObj->getRevContent();
+        $msg = Config::get('wechat.welcome');
         $this->weObj->text($msg)->reply();
+    }
+
+    /**
+     * 发送文本客服消息
+     * @param $openid
+     * @param $msg
+     * @return mixed
+     */
+    public function sendCustomMessageText($openid, $msg)
+    {
+        $result = $this->weObj->sendCustomMessage([
+            'touser'=>$openid,
+            'msgtype'=>'text',
+            'text'=>[
+                'content'=>$msg
+            ]]);
+        return $result;
+    }
+
+    /**
+     * 预约挂号成功通知
+     * @param $openid
+     * @param $url
+     * @param $name
+     * @param $ksmc
+     * @param $ysxm
+     * @return mixed
+     */
+    public function sendTemplateMessageOrder($openid, $url, $name, $ksmc, $ysxm)
+    {
+        $template_id = Config::get('wechat.template.order');
+
+        $data = [
+            'touser' => $openid,
+            'template_id' => $template_id,
+            'url' => $url,
+            'color' => '#606266',
+            'data' => [
+                'title' => [
+                    'value' => '预约挂号成功通知',
+                    "color"=>"#67C23A"
+                ],
+                'name' => [
+                    'value' => '于占伟',
+                    "color"=>"#606266"
+                ],
+                'ksmc' => [
+                    'value' => '门诊内科',
+                    "color"=>"#606266"
+                ],
+                'mzlx' => [
+                    'value' => '普通门诊',
+                    "color"=>"#606266"
+                ],
+                'jzsj' => [
+                    'value' => '2019-01-13',
+                    "color"=>"#606266"
+                ],
+                'jzdd' => [
+                    'value' => '内科三诊室',
+                    "color"=>"#606266"
+                ],
+                'remark' => [
+                    'value' => '您的就诊序号为29，无需区号，请与1月23日上午前来就诊',
+                    "color"=>"#E6A23C"
+                ],
+            ]
+        ];
+        $result = $this->weObj->sendTemplateMessage($data);
+        return $result;
+    }
+
+
+    /**
+     * 门诊缴费成功通知
+     * @param $openid
+     * @param $url
+     * @param $name
+     * @param $ksmc
+     * @param $ysxm
+     * @return mixed
+     */
+    public function sendTemplateMessagePayment($openid, $url, $name, $ksmc, $ysxm)
+    {
+        $template_id = Config::get('wechat.template.payment');
+
+        $data = [
+            'touser' => $openid,
+            'template_id' => $template_id,
+            'url' => $url,
+            'color' => '#606266',
+            'data' => [
+                'title' => [
+                    'value' => '预约挂号成功通知',
+                    "color"=>"#67C23A"
+                ],
+                'name' => [
+                    'value' => '于占伟',
+                    "color"=>"#606266"
+                ],
+                'ksmc' => [
+                    'value' => '门诊内科',
+                    "color"=>"#606266"
+                ],
+                'mzlx' => [
+                    'value' => '普通门诊',
+                    "color"=>"#606266"
+                ],
+                'jzsj' => [
+                    'value' => '2019-01-13',
+                    "color"=>"#606266"
+                ],
+                'jzdd' => [
+                    'value' => '内科三诊室',
+                    "color"=>"#606266"
+                ],
+                'remark' => [
+                    'value' => '您的就诊序号为29，无需区号，请与1月23日上午前来就诊',
+                    "color"=>"#E6A23C"
+                ],
+            ]
+        ];
+        $result = $this->weObj->sendTemplateMessage($data);
+        return $result;
     }
 
 }
