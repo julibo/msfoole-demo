@@ -59,7 +59,11 @@ class Wechat extends BaseServer
             return null;
         }
         if ($result == true) {
-            $type = $this->weObj->getRev()->getRevType();
+            $openid = $this->weObj->getRev()->getRevFrom();
+            if (!$this->cache->get($openid)) {
+                $this->cache->set($openid, ['openid'=>$openid]);
+            }
+            $type = $this->weObj->getRevType();
             switch($type) {
                 case WechatApi::EVENT_SUBSCRIBE: //  订阅
                     $this->subscribe();
@@ -88,7 +92,7 @@ class Wechat extends BaseServer
         }
         $user['ip'] = $this->ip;
         // 缓存用户信息
-        $this->cache->set($token['openid'], $user);
+        $this->cache->set($token['openid'], $user, 0);
         // 用户授权成功
         $this->jumpUrl($params['state'], $token['openid']);
     }
