@@ -289,6 +289,9 @@ class MicroWeb extends BaseServer
                 foreach ($response['item'] as $vo) {
                     if ($vo['mzh'] == $order['code']) {
                         $result = $vo;
+                        $result['status'] = 2;
+                        $result['info'] = $order['info'];
+                        $result['kzsj'] = $kzsj;
                         break;
                     }
                 }

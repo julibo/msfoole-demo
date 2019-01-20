@@ -531,7 +531,6 @@ class Robot extends BaseServer
     /**
      * 微信挂号处理
      * @param array $order
-     * @throws Exception
      */
     public function wehcatRegHandle(array $order)
     {
@@ -571,7 +570,7 @@ class Robot extends BaseServer
             $name = $info['name'];
             $ksmc = $info['zzksmc'];
             $ysxm = $info['ysxm'];
-            $mzh = responseQh['mzh'];
+            $mzh = $responseQh['mzh'];
             $url = sprintf('%s/?token=%s&path=%s&order=%s&cardno=%s',
                 Config::get('wechat.baseurl'), $openid, 'regResult', $order['out_trade_no'], $info['kh']);
             Wechat::getInstance()->sendTemplateMessageOrder($openid, $url, $name, $ksmc, $ysxm, $jzsj, $mzh);
@@ -592,7 +591,6 @@ class Robot extends BaseServer
             } else {
                 OrderModel::getInstance()->updateOrderStatus($order['id'], 4);
                 $msg = '预约挂号失败，快速退款失败，将转由人工处理，预计7个工作日到账。';
-                throw new Exception('快速退款失败，将转由人工处理', Feedback::$Exception['SERVICE_API_ERROR']['code']);
             }
             Wechat::getInstance()->sendCustomMessageText($info['openid'], $msg);
         }
