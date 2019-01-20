@@ -127,20 +127,21 @@ class Index extends BaseController
     public function createOrder()
     {
         $openid = $this->user['openid'];
+        $ip = $this->user['ip'] ?? '127.0.0.1';
         $kh = $this->params['cardno'] ?? null;
+        $name = $this->params['name'] ?? null;
         $ysbh = $this->params['ysbh'] ?? null;
-        $zzks = $this->params['zzks'] ?? null;
-        $ghrq = $this->params['ghrq'] ?? null;
-        $ghlb = $this->params['ghlb'] ?? null;
+        $ysxm = $this->params['ysxm'] ?? '';
         $ysh_lx = $this->params['ysh_lx'] ?? null;
+        $ghlb = $this->params['ghlb'] ?? null;
+        $zzks = $this->params['zzks'] ?? null;
+        $zzksmc = $this->params['zzksmc'] ?? '';
+        $ghrq = $this->params['ghrq'] ?? null;
         $ghf = $this->params['ghf'] ?? null;
         $zfzl = $this->params['zfzl'] ?? null;
-        $ip = $this->user->ip ?? '127.0.0.1';
+        $is_raw = $this->params['is_raw'] ?? 1;
         $body = '预约挂号费';
-        $is_raw = $this->params['is_raw'] ?? 0;
-        $zzksmc = $this->params['zzksmc'] ?? '';
-        $ysxm = $this->params['ysxm'] ?? '';
-        $result = $this->wechat->createOrder($openid, $kh, $ysbh, $ysxm, $zzks, $zzksmc, $ghrq, $ghlb, $ysh_lx, $zfzl, $ghf, $ip, $body, $is_raw);
+        $result = $this->wechat->createOrder($openid, $kh, $name, $ysbh, $ysxm, $zzks, $zzksmc, $ghrq, $ghlb, $ysh_lx, $zfzl, $ghf, $ip, $body, $is_raw);
         return $result;
     }
 

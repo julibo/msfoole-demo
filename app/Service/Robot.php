@@ -268,7 +268,6 @@ class Robot extends BaseServer
      * @param $xml
      * @return string
      * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function callbackWFT($xml)
     {
@@ -529,7 +528,11 @@ class Robot extends BaseServer
         }
     }
 
-
+    /**
+     * 微信挂号处理
+     * @param array $order
+     * @throws Exception
+     */
     public function wehcatRegHandle(array $order)
     {
         // 完成预约挂号
@@ -557,8 +560,21 @@ class Robot extends BaseServer
         if ($result) {
             OrderModel::getInstance()->updateOrderStatus($order['id'], 2, $responseQh['mzh']);
             // todo 推送模板消息
-
-
+            if ($info['ysh_lx'] == 1) {
+                $jzsj = $info['ghrq'] . " 上午";
+            } else if ($info['ysh_lx'] == 2) {
+                $jzsj = $info['ghrq'] . " 下午";
+            } else {
+                $jzsj = $info['ghrq'];
+            }
+            $openid = $info['openid'];
+            $name = $info['name'];
+            $ksmc = $info['zzksmc'];
+            $ysxm = $info['ysxm'];
+            $mzh = responseQh['mzh'];
+            $url = sprintf('%s/?token=%s&path=%s&order=%s&cardno=%s',
+                Config::get('wechat.baseurl'), $openid, 'regResult', $order['out_trade_no'], $info['kh']);
+            Wechat::getInstance()->sendTemplateMessageOrder($openid, $url, $name, $ksmc, $ysxm, $jzsj, $mzh);
         } else {
             // 原路返回款项
             $params = [
@@ -572,11 +588,13 @@ class Robot extends BaseServer
             $refundResult = PaymentApi::getInstance()->submitRefund($params);
             if ($refundResult) {
                 OrderModel::getInstance()->updateOrderStatus($order['id'], 5);
+                $msg = '预约挂号失败，挂号费已原路返回，预计7个工作日到账。';
             } else {
                 OrderModel::getInstance()->updateOrderStatus($order['id'], 4);
+                $msg = '预约挂号失败，快速退款失败，将转由人工处理，预计7个工作日到账。';
                 throw new Exception('快速退款失败，将转由人工处理', Feedback::$Exception['SERVICE_API_ERROR']['code']);
             }
-            // todo 推送失败通知
+            Wechat::getInstance()->sendCustomMessageText($info['openid'], $msg);
         }
     }
 

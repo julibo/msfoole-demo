@@ -257,9 +257,9 @@ class Order extends BaseModel
      * @param int $type
      * @return array|bool
      */
-    public function createWechatOrder($openid, $cardno, $ysbh, $ysxm, $zzks, $zzksmc, $ghrq, $ghlb, $ysh_lx, $zfzl, $zfje, $body, $ip, $group = 4, $source = 3, $type = 1)
+    public function createWechatOrder($openid, $cardno, $name, $ysbh, $ysxm, $zzks, $zzksmc, $ghrq, $ghlb, $ysh_lx, $zfzl, $zfje, $body, $ip, $group = 4, $source = 3, $type = 1)
     {
-        $info = ['openid' => $openid, 'kh' => $cardno, 'ysbh' => $ysbh, 'ysxm' => $ysxm, 'zzks' => $zzks, 'zzksmc' => $zzksmc, 'ghrq'=>$ghrq, 'ghlb'=>$ghlb, 'ysh_lx'=>$ysh_lx, 'zfje' => $zfje, 'zfzl'=> $zfzl];
+        $info = ['openid' => $openid, 'kh' => $cardno, 'name'=>$name, 'ysbh' => $ysbh, 'ysxm' => $ysxm, 'zzks' => $zzks, 'zzksmc' => $zzksmc, 'ghrq'=>$ghrq, 'ghlb'=>$ghlb, 'ysh_lx'=>$ysh_lx, 'zfje' => $zfje, 'zfzl'=> $zfzl];
         $nonce_str = Helper::guid();
         $orderID = $this->getOrderID($cardno);
         $data = [

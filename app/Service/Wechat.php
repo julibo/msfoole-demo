@@ -161,12 +161,13 @@ class Wechat extends BaseServer
      * @param $name
      * @param $ksmc
      * @param $ysxm
+     * @param $jzsj
+     * @param $mzh
      * @return mixed
      */
-    public function sendTemplateMessageOrder($openid, $url, $name, $ksmc, $ysxm)
+    public function sendTemplateMessageOrder($openid, $url, $name, $ksmc, $ysxm, $jzsj, $mzh)
     {
         $template_id = Config::get('wechat.template.order');
-
         $data = [
             'touser' => $openid,
             'template_id' => $template_id,
@@ -178,27 +179,23 @@ class Wechat extends BaseServer
                     "color"=>"#67C23A"
                 ],
                 'name' => [
-                    'value' => '于占伟',
+                    'value' => $name,
                     "color"=>"#606266"
                 ],
                 'ksmc' => [
-                    'value' => '门诊内科',
+                    'value' => $ksmc,
                     "color"=>"#606266"
                 ],
-                'mzlx' => [
-                    'value' => '普通门诊',
+                'ysxm' => [
+                    'value' => $ysxm,
                     "color"=>"#606266"
                 ],
                 'jzsj' => [
-                    'value' => '2019-01-13',
-                    "color"=>"#606266"
-                ],
-                'jzdd' => [
-                    'value' => '内科三诊室',
+                    'value' => $jzsj,
                     "color"=>"#606266"
                 ],
                 'remark' => [
-                    'value' => '您的就诊序号为29，无需区号，请与1月23日上午前来就诊',
+                    'value' => '您的门诊号为'.$mzh.'，请于'.$jzsj.'前来就诊',
                     "color"=>"#E6A23C"
                 ],
             ]

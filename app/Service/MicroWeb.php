@@ -210,14 +210,32 @@ class MicroWeb extends BaseServer
         return $result;
     }
 
-
-    public function createOrder($openid, $cardNo, $ysbh, $ysxm, $zzks, $zzksmc, $ghrq, $ghlb, $ysh_lx, $zfzl, $zfje, $ip, $body, $is_raw = 0)
+    /**
+     * 创建预约挂号订单
+     * @param $openid
+     * @param $cardNo
+     * @param $ysbh
+     * @param $ysxm
+     * @param $zzks
+     * @param $zzksmc
+     * @param $ghrq
+     * @param $ghlb
+     * @param $ysh_lx
+     * @param $zfzl
+     * @param $zfje
+     * @param $ip
+     * @param $body
+     * @param int $is_raw
+     * @return array|bool
+     * @throws Exception
+     */
+    public function createOrder($openid, $cardNo, $name, $ysbh, $ysxm, $zzks, $zzksmc, $ghrq, $ghlb, $ysh_lx, $zfzl, $zfje, $ip, $body, $is_raw = 1)
     {
-        if (empty($openid) || empty($cardNo) || empty($ysbh) || empty($zzks) || empty($ghrq) || empty($ghlb) ||
-            empty($ysh_lx) || empty($body) || empty($ip) || empty($zfje)) {
+        if (empty($openid) || empty($cardNo) || empty($ysbh) || empty($ysxm) || empty($zzks) || empty($zzksmc) || empty($ghrq) || empty($ghlb) ||
+            empty($ysh_lx) || empty($zfzl) || empty($zfje) ||  empty($ip) || empty($body) || !isset($is_raw) || empty($name)) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
-        $orderData = OrderModel::getInstance()->createWechatOrder($openid, $cardNo, $ysbh, $ysxm, $zzks, $zzksmc, $ghrq, $ghlb, $ysh_lx, $zfzl, $zfje, $body, $ip);
+        $orderData = OrderModel::getInstance()->createWechatOrder($openid, $cardNo, $name,$ysbh, $ysxm, $zzks, $zzksmc, $ghrq, $ghlb, $ysh_lx, $zfzl, $zfje, $body, $ip);
         if ($orderData == false) {
             throw new Exception(Feedback::$Exception['SERVICE_SQL_ERROR']['msg'], Feedback::$Exception['SERVICE_SQL_ERROR']['code']);
         }
@@ -232,7 +250,8 @@ class MicroWeb extends BaseServer
                 'pay_info' => $payResult['pay_info'],
                 'is_raw' => $is_raw,
                 'token_id' => $payResult['token_id'],
-                'order' => $orderData['out_trade_no']
+                'order' => $orderData['out_trade_no'],
+                'cardNo' => $cardNo
             ];
         }
         return $result;
