@@ -313,13 +313,21 @@ class MicroWeb extends BaseServer
         if (!empty($response) && !empty($response['item'])) {
             foreach ($response['item'] as $vo) {
                 if ($vo['mzh'] == $mzh) {
-                    $kzsj = $vo['ghrq'];
+                    $order = OrderModel::getInstance()->getOrderByCode($mzh);
+                    if (!empty($order)) {
+                        $info = json_decode($order['info'], true);
+                    } else {
+                        $info = [];
+                    }
+                    $kzsj = $info['ghrq'] ?? '';
                     if ($vo['ysh_lx'] == 1) {
                         $kzsj .= ' 上午';
                     } else if ($vo['ysh_lx'] == 2) {
                         $kzsj .= ' 下午';
                     }
                     $vo['kzsj'] = $kzsj;
+                    $vo['ksmc'] = $info['zzksmc'] ?? '';
+                    $vo['zfje'] = $info['zfje'] ?? 0;
                     $result = $vo;
                     break;
                 }
