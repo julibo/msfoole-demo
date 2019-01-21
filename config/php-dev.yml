@@ -1,7 +1,7 @@
 # 开发环境配置
 # application
 APPLICATION__DEBUG: true
-APPLICATION__ACCESS__ORIGIN: http://127.0.0.1:8080,http://wechat.julibo.com
+APPLICATION__ACCESS__ORIGIN: http://127.0.0.1:8080,http://wechat.julibo.com,http://wap.julibo.com
 APPLICATION__TOKEN__SWITCH: true
 APPLICATION__TOKEN__CODE: true
 # cache

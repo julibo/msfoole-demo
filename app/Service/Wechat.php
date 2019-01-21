@@ -92,7 +92,7 @@ class Wechat extends BaseServer
         }
         $user['ip'] = $this->ip;
         // 缓存用户信息
-        $this->cache->set($token['openid'], $user, 0);
+        $this->cache->set($token['openid'], $user);
         // 用户授权成功
         $this->jumpUrl($params['state'], $token['openid']);
     }
@@ -213,12 +213,12 @@ class Wechat extends BaseServer
      * 门诊缴费成功通知
      * @param $openid
      * @param $url
+     * @param $mzh
+     * @param $money
      * @param $name
-     * @param $ksmc
-     * @param $ysxm
      * @return mixed
      */
-    public function sendTemplateMessagePayment($openid, $url, $name, $ksmc, $ysxm)
+    public function sendTemplateMessagePayment($openid, $url, $mzh, $money, $name)
     {
         $template_id = Config::get('wechat.template.payment');
 
@@ -229,33 +229,21 @@ class Wechat extends BaseServer
             'color' => '#606266',
             'data' => [
                 'title' => [
-                    'value' => '预约挂号成功通知',
+                    'value' => '门诊缴费成功通知',
                     "color"=>"#67C23A"
                 ],
+                'mzh' => [
+                    'value' => $mzh,
+                    "color"=>"#606266"
+                ],
+                'money' => [
+                    'value' => $money,
+                    "color"=>"#409EFF"
+                ],
                 'name' => [
-                    'value' => '于占伟',
+                    'value' => $name,
                     "color"=>"#606266"
-                ],
-                'ksmc' => [
-                    'value' => '门诊内科',
-                    "color"=>"#606266"
-                ],
-                'mzlx' => [
-                    'value' => '普通门诊',
-                    "color"=>"#606266"
-                ],
-                'jzsj' => [
-                    'value' => '2019-01-13',
-                    "color"=>"#606266"
-                ],
-                'jzdd' => [
-                    'value' => '内科三诊室',
-                    "color"=>"#606266"
-                ],
-                'remark' => [
-                    'value' => '您的就诊序号为29，无需区号，请与1月23日上午前来就诊',
-                    "color"=>"#E6A23C"
-                ],
+                ]
             ]
         ];
         $result = $this->weObj->sendTemplateMessage($data);

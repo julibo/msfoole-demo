@@ -407,7 +407,7 @@ class MicroWeb extends BaseServer
             foreach ($response['item'] as $vo) {
                 if ($vo['mzh'] == $mzh) {
                     $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
-                    $vo['je'] = sprintf('￥%s', $vo['je']);
+                    $vo['money'] = sprintf('￥%s', $vo['je']);
                     $result = $vo;
                 }
             }
@@ -429,8 +429,9 @@ class MicroWeb extends BaseServer
                 $response = $this->hospitalApi->apiClient('getjfmx', ['kh' => $card['cardno']]);
                 if (!empty($response) && !empty($response['item'])) {
                     foreach ($response['item'] as $vo) {
-                        if (empty($vo['skbs'])) {
+                        if (!empty($vo['skbs'])) {
                             $vo['cardno'] = $card['cardno'];
+                            $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
                             array_push($result, $vo);
                         }
                     }
@@ -471,6 +472,7 @@ class MicroWeb extends BaseServer
             $result = false;
         } else {
             $result = [
+                'cardno' => $cardNo,
                 'pay_info' => $payResult['pay_info'],
                 'is_raw' => $is_raw,
                 'token_id' => $payResult['token_id'],

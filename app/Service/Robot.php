@@ -292,7 +292,7 @@ class Robot extends BaseServer
                             case 4: // 微信预约挂号
                                 $this->wehcatRegHandle($order);
                             case 5: // 微信门诊缴费
-                                $this->wehcatPayHandle($order);
+                                $this->wechatPayHandle($order);
                         }
                         return 'success';
                     }
@@ -596,43 +596,43 @@ class Robot extends BaseServer
         }
     }
 
+    /**
+     * 微信门诊缴费
+     * @param array $order
+     */
     public function wechatPayHandle(array $order)
     {
         // todo 完成门诊缴费
         $info = json_decode($order['info'], true);
         $payResult = $this->payment($info, $order['id']);
         if ($payResult) {
-            $notice = [
-                'type' => 1, // websocket广播
-                'client' => $order['client'],
-                'group' => 2,
-                'result' => 1,
-                'body' => ['skbs' => $payResult['skbs'], 'lx' => 2],
-                'ksbs' => $payResult['skbs']
-            ];
-            Channel::instance()->push($notice);
-            $sms = [
-                'type' => 2,
-                'class' => self::class,
-                'method' => 'sendSms',
-                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'缴费成功，祝您早日康复！']
-            ];
-            Channel::instance()->push($sms);
+            // todo 推送模板消息
+            $openid = $info['openid'];
+            $mzh = $info['mzh'];
+            $money = "￥". $info['zfje'];
+            $name = $info['name'];
+            $url = sprintf('%s/?token=%s&path=%s&mzh=%s&cardno=%s',
+                Config::get('wechat.baseurl'), $openid, 'payDetails', $mzh, $info['kh']);
+            Wechat::getInstance()->sendTemplateMessagePayment($openid, $url, $mzh, $money, $name);
         } else {
-            $notice = [
-                'type' => 1, // websocket广播
-                'client' => $order['client'],
-                'group' => 2,
-                'result' => 0
+            // 原路返回款项
+            $params = [
+                'out_trade_no' => $order['out_trade_no'],
+                'out_refund_no' => $order['out_trade_no'] . 'R',
+                'total_fee' => $order['total_fee'],
+                'refund_fee' => $order['total_fee'],
+                'refund_channel' => 'ORIGINAL',
+                'nonce_str' => Helper::guid()
             ];
-            Channel::instance()->push($notice);
-            $sms = [
-                'type' => 2,
-                'class' => static::class,
-                'method' => 'sendSms',
-                'parameter' => ['cardno'=>$info['cardno'], 'content'=>'缴费失败，该款项将按原路返回']
-            ];
-            Channel::instance()->push($sms);
+            $refundResult = PaymentApi::getInstance()->submitRefund($params);
+            if ($refundResult) {
+                OrderModel::getInstance()->updateOrderStatus($order['id'], 5);
+                $msg = '门诊缴费失败，款项已原路返回，预计7个工作日到账。';
+            } else {
+                OrderModel::getInstance()->updateOrderStatus($order['id'], 4);
+                $msg = '门诊缴费失败，快速退款失败，将转由人工处理，预计7个工作日到账。';
+            }
+            Wechat::getInstance()->sendCustomMessageText($info['openid'], $msg);
         }
     }
 }
