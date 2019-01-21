@@ -218,12 +218,13 @@ class Index extends BaseController
     {
         $openid = $this->user['openid'];
         $cardNo = $this->params['cardno'] ?? null;
+        $name = $this->params['name'] ?? null;
         $mzh = $this->params['mzh'] ?? null;
         $je = $this->params['je'] ?? null;
         $is_raw = $this->params['is_raw'] ?? null;
         $body = "门诊缴费";
         $ip = $this->user['ip'] ?? '127.0.0.1';
-        $result = $this->wechat->createPayOrder($openid, $cardNo, $mzh, $je, $is_raw, $body, $ip);
+        $result = $this->wechat->createPayOrder($openid, $cardNo, $name, $mzh, $je, $is_raw, $body, $ip);
         return $result;
     }
 

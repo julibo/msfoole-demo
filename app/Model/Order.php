@@ -287,11 +287,11 @@ class Order extends BaseModel
     }
 
 
-    public function createWechatPayOrder($openid, $cardNo, $mzh, $zfje, $zfzl, $body, $ip, $group = 5, $source = 3, $type = 1)
+    public function createWechatPayOrder($openid, $cardNo, $name, $mzh, $zfje, $zfzl, $body, $ip, $group = 5, $source = 3, $type = 1)
     {
         $nonce_str = Helper::guid();
         $orderID = $this->getOrderID($cardNo);
-        $info = ['openid' => $openid, 'kh' => $cardNo, 'mzh' => $mzh, 'zfje' => $zfje, 'zfzl'=> $zfzl, 'sjh' => $orderID];
+        $info = ['openid' => $openid, 'kh' => $cardNo, 'name'=>$name, 'mzh' => $mzh, 'zfje' => $zfje, 'zfzl'=> $zfzl, 'sjh' => $orderID];
         $data = [
             'out_trade_no' => $orderID,
             'user' => $cardNo,

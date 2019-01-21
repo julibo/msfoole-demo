@@ -445,6 +445,7 @@ class MicroWeb extends BaseServer
      * 创建门诊缴费订单
      * @param $openid
      * @param $cardNo
+     * @param $name
      * @param $mzh
      * @param $je
      * @param $is_raw
@@ -453,14 +454,14 @@ class MicroWeb extends BaseServer
      * @return array|bool
      * @throws Exception
      */
-    public function createPayOrder($openid, $cardNo, $mzh, $je, $is_raw, $body, $ip)
+    public function createPayOrder($openid, $cardNo, $name, $mzh, $je, $is_raw, $body, $ip)
     {
         if (empty($openid) || empty($cardNo) || empty($mzh) || empty($je) || !isset($is_raw)) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         // 支付种类
         $zfzl = 3;
-        $orderData = OrderModel::getInstance()->createWechatPayOrder($openid, $cardNo, $mzh, $je, $zfzl, $body, $ip);
+        $orderData = OrderModel::getInstance()->createWechatPayOrder($openid, $cardNo, $name, $mzh, $je, $zfzl, $body, $ip);
         if ($orderData == false) {
             throw new Exception(Feedback::$Exception['SERVICE_SQL_ERROR']['msg'], Feedback::$Exception['SERVICE_SQL_ERROR']['code']);
         }
