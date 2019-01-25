@@ -7,7 +7,6 @@ namespace App\Logic;
 use App\Lib\Wechat\Wechat;
 use Julibo\Msfoole\Facade\Config;
 use Julibo\Msfoole\Facade\Log;
-use Julibo\Msfoole\Exception;
 use Julibo\Msfoole\Cache;
 
 class WechatApi extends Wechat

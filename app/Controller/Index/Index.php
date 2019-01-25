@@ -3,14 +3,16 @@ namespace App\Controller\Index;
 
 use Julibo\Msfoole\HttpController as BaseController;
 use App\Service\Sale as SaleService;
-use Julibo\Msfoole\Facade\Config;
-use Julibo\Msfoole\Cache;
 
 class Index extends BaseController
 {
+    private $server;
+
     protected function init()
     {
         // TODO: Implement init() method.
+        $this->server = SaleService::getInstance();
+        $this->server->cache = $this->cache;
     }
 
     /**
@@ -36,7 +38,7 @@ class Index extends BaseController
     public function getCode()
     {
         $number = $this->params['number'] ?? null;
-        $result = SaleService::getInstance()->getCode($number);
+        $result = $this->server->getCode($number);
         return $result;
     }
 
@@ -48,11 +50,12 @@ class Index extends BaseController
         $result = false;
         $number = $this->params['number'] ?? null;
         $code = $this->params['code'] ?? null;
-        $user = SaleService::getInstance()->login($number, $code);
+        $user = $this->server->login($number, $code);
         if ($user) {
             $this->setToken($user);
             $result = true;
         }
         return $result;
     }
+
 }

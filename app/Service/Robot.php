@@ -268,7 +268,6 @@ class Robot extends BaseServer
      * @param $xml
      * @return string
      * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function callbackWFT($xml)
     {
@@ -281,15 +280,19 @@ class Robot extends BaseServer
                     $updateResult = OrderModel::getInstance()->updateOrderStatus($order['id'], 1);
                     if ($updateResult) {
                         switch ($order['group']) {
-                            case 1:// 挂号
+                            case 1: // 终端机挂号
                                 $this->regOrderHandle($order);
                                 break;
-                            case 2:// 缴费
+                            case 2: // 终端机缴费
                                 $this->payOrderHandle($order);
                                 break;
-                            case 3:// 预约挂号
+                            case 3: // web预约挂号
                                 $this->saleOrderHandle($order);
                                 break;
+                            case 4: // 微信预约挂号
+                                $this->wehcatRegHandle($order);
+                            case 5: // 微信门诊缴费
+                                $this->wechatPayHandle($order);
                         }
                         return 'success';
                     }
@@ -465,13 +468,12 @@ class Robot extends BaseServer
      * 预约挂号
      * @param array $order
      * @throws Exception
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function saleOrderHandle(array $order)
     {
         $result = false;
         $info = json_decode($order['info'], true);
-        $responseDj = HospitalApi::getInstance()->apiClient('yydj', [
+        $responseDj = $this->hospitalApi->apiClient('yydj', [
             'kh' => $info['kh'],
             'ysbh' => $info['ysbh'],
             'zzks' => $info['zzks'],
@@ -480,7 +482,7 @@ class Robot extends BaseServer
             'ysh_lx' => $info['ysh_lx'],
         ]);
         if (!empty($responseDj) && $responseDj['hybh']) {
-            $responseQh = HospitalApi::getInstance()->apiClient('yydj_qh', [
+            $responseQh = $this->hospitalApi->apiClient('yydj_qh', [
                 'hybh' => $responseDj['hybh'],
                 'sjh' => $order['out_trade_no'],
                 'zfzl' => $info['zfzl'],
@@ -495,7 +497,7 @@ class Robot extends BaseServer
                 'type' => 2,
                 'class' => self::class,
                 'method' => 'sendSms',
-                'parameter' => ['cardno'=>$info['kh'], 'content'=>'预约挂号成功，欢迎准时就诊']
+                'parameter' => ['cardno'=>$info['kh'], 'content'=>'预约挂号成功，欢迎按时就诊']
             ];
             Channel::instance()->push($sms);
             OrderModel::getInstance()->updateOrderStatus($order['id'], 2, $responseQh['mzh']);
@@ -521,9 +523,116 @@ class Robot extends BaseServer
                 OrderModel::getInstance()->updateOrderStatus($order['id'], 5);
             } else {
                 OrderModel::getInstance()->updateOrderStatus($order['id'], 4);
-                throw new Exception('快速退款失败，将转由人工处理', 220);
+                throw new Exception('快速退款失败，将转由人工处理', Feedback::$Exception['SERVICE_API_ERROR']['code']);
             }
         }
     }
 
+    /**
+     * 微信挂号处理
+     * @param array $order
+     */
+    public function wehcatRegHandle(array $order)
+    {
+        // 完成预约挂号
+        $result = false;
+        $info = json_decode($order['info'], true);
+        $responseDj = $this->hospitalApi->apiClient('yydj', [
+            'kh' => $info['kh'],
+            'ysbh' => $info['ysbh'],
+            'zzks' => $info['zzks'],
+            'ghrq' => $info['ghrq'],
+            'ghlb' => $info['ghlb'],
+            'ysh_lx' => $info['ysh_lx'],
+        ]);
+        if (!empty($responseDj) && $responseDj['hybh']) {
+            $responseQh = $this->hospitalApi->apiClient('yydj_qh', [
+                'hybh' => $responseDj['hybh'],
+                'sjh' => $order['out_trade_no'],
+                'zfzl' => $info['zfzl'],
+                'zfje' => $info['zfje']
+            ]);
+            if (!empty($responseQh) && $responseQh['mzh']) {
+                $result = true;
+            }
+        }
+        if ($result) {
+            OrderModel::getInstance()->updateOrderStatus($order['id'], 2, $responseQh['mzh']);
+            // todo 推送模板消息
+            if ($info['ysh_lx'] == 1) {
+                $jzsj = $info['ghrq'] . " 上午";
+            } else if ($info['ysh_lx'] == 2) {
+                $jzsj = $info['ghrq'] . " 下午";
+            } else {
+                $jzsj = $info['ghrq'];
+            }
+            $openid = $info['openid'];
+            $name = $info['name'];
+            $ksmc = $info['zzksmc'];
+            $ysxm = $info['ysxm'];
+            $mzh = $responseQh['mzh'];
+            $url = sprintf('%s/?token=%s&path=%s&order=%s&cardno=%s',
+                Config::get('wechat.baseurl'), $openid, 'regResult', $order['out_trade_no'], $info['kh']);
+            Wechat::getInstance()->sendTemplateMessageOrder($openid, $url, $name, $ksmc, $ysxm, $jzsj, $mzh);
+        } else {
+            // 原路返回款项
+            $params = [
+                'out_trade_no' => $order['out_trade_no'],
+                'out_refund_no' => $order['out_trade_no'] . 'R',
+                'total_fee' => $order['total_fee'],
+                'refund_fee' => $order['total_fee'],
+                'refund_channel' => 'ORIGINAL',
+                'nonce_str' => Helper::guid()
+            ];
+            $refundResult = PaymentApi::getInstance()->submitRefund($params);
+            if ($refundResult) {
+                OrderModel::getInstance()->updateOrderStatus($order['id'], 5);
+                $msg = '预约挂号失败，挂号费已原路返回，预计7个工作日到账。';
+            } else {
+                OrderModel::getInstance()->updateOrderStatus($order['id'], 4);
+                $msg = '预约挂号失败，快速退款失败，将转由人工处理，预计7个工作日到账。';
+            }
+            Wechat::getInstance()->sendCustomMessageText($info['openid'], $msg);
+        }
+    }
+
+    /**
+     * 微信门诊缴费
+     * @param array $order
+     */
+    public function wechatPayHandle(array $order)
+    {
+        // todo 完成门诊缴费
+        $info = json_decode($order['info'], true);
+        $payResult = $this->payment($info, $order['id']);
+        if ($payResult) {
+            // todo 推送模板消息
+            $openid = $info['openid'];
+            $mzh = $info['mzh'];
+            $money = "￥". $info['zfje'];
+            $name = $info['name'];
+            $url = sprintf('%s/?token=%s&path=%s&mzh=%s&cardno=%s',
+                Config::get('wechat.baseurl'), $openid, 'payDetails', $mzh, $info['kh']);
+            Wechat::getInstance()->sendTemplateMessagePayment($openid, $url, $mzh, $money, $name);
+        } else {
+            // 原路返回款项
+            $params = [
+                'out_trade_no' => $order['out_trade_no'],
+                'out_refund_no' => $order['out_trade_no'] . 'R',
+                'total_fee' => $order['total_fee'],
+                'refund_fee' => $order['total_fee'],
+                'refund_channel' => 'ORIGINAL',
+                'nonce_str' => Helper::guid()
+            ];
+            $refundResult = PaymentApi::getInstance()->submitRefund($params);
+            if ($refundResult) {
+                OrderModel::getInstance()->updateOrderStatus($order['id'], 5);
+                $msg = '门诊缴费失败，款项已原路返回，预计7个工作日到账。';
+            } else {
+                OrderModel::getInstance()->updateOrderStatus($order['id'], 4);
+                $msg = '门诊缴费失败，快速退款失败，将转由人工处理，预计7个工作日到账。';
+            }
+            Wechat::getInstance()->sendCustomMessageText($info['openid'], $msg);
+        }
+    }
 }
