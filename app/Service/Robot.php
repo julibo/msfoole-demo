@@ -568,12 +568,13 @@ class Robot extends BaseServer
             }
             $openid = $info['openid'];
             $name = $info['name'];
+            $cardNo = $info['cardno'];
             $ksmc = $info['zzksmc'];
             $ysxm = $info['ysxm'];
             $mzh = $responseQh['mzh'];
             $url = sprintf('%s/?token=%s&path=%s&order=%s&cardno=%s',
                 Config::get('wechat.baseurl'), $openid, 'regResult', $order['out_trade_no'], $info['kh']);
-            Wechat::getInstance()->sendTemplateMessageOrder($openid, $url, $name, $ksmc, $ysxm, $jzsj, $mzh);
+            Wechat::getInstance()->sendTemplateMessageOrder($openid, $url, $name, $cardNo, $ksmc, $ysxm, $jzsj, $mzh);
         } else {
             // 原路返回款项
             $params = [

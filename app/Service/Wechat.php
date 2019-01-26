@@ -169,7 +169,7 @@ class Wechat extends BaseServer
      * @param $mzh
      * @return mixed
      */
-    public function sendTemplateMessageOrder($openid, $url, $name, $ksmc, $ysxm, $jzsj, $mzh)
+    public function sendTemplateMessageOrder($openid, $url, $name, $cardNo, $ksmc, $ysxm, $jzsj, $mzh)
     {
         $template_id = Config::get('wechat.template.order');
         $data = [
@@ -178,23 +178,27 @@ class Wechat extends BaseServer
             'url' => $url,
             'color' => '#606266',
             'data' => [
-                'title' => [
-                    'value' => '预约挂号成功通知',
+                'first' => [
+                    'value' => '预约挂号成功',
                     "color"=>"#67C23A"
                 ],
-                'name' => [
+                'keyword1' => [
                     'value' => $name,
                     "color"=>"#606266"
                 ],
-                'ksmc' => [
+                'keyword2' => [
+                    'value' => $cardNo,
+                    "color"=>"#606266"
+                ],
+                'keyword3' => [
                     'value' => $ksmc,
                     "color"=>"#606266"
                 ],
-                'ysxm' => [
+                'keyword4' => [
                     'value' => $ysxm,
                     "color"=>"#606266"
                 ],
-                'jzsj' => [
+                'keyword5' => [
                     'value' => $jzsj,
                     "color"=>"#606266"
                 ],
@@ -228,22 +232,26 @@ class Wechat extends BaseServer
             'url' => $url,
             'color' => '#606266',
             'data' => [
-                'title' => [
-                    'value' => '门诊缴费成功通知',
+                'first' => [
+                    'value' => '门诊缴费成功',
                     "color"=>"#67C23A"
                 ],
-                'mzh' => [
+                'keyword1' => [
                     'value' => $mzh,
                     "color"=>"#606266"
                 ],
-                'money' => [
+                'keyword2' => [
                     'value' => $money,
                     "color"=>"#409EFF"
                 ],
-                'name' => [
+                'keyword3' => [
                     'value' => $name,
                     "color"=>"#606266"
-                ]
+                ],
+                'remark' => [
+                    'value' => '祝您早日康复',
+                    "color"=>"#E6A23C"
+                ],
             ]
         ];
         $result = $this->weObj->sendTemplateMessage($data);

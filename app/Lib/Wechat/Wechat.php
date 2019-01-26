@@ -222,9 +222,9 @@ class Wechat
 	private $token;
 	private $encodingAesKey;
 	private $encrypt_type;
-	private $appid;
+	public $appid;
 	private $appsecret;
-	private $access_token;
+	public $access_token;
 	private $jsapi_ticket;
 	private $api_ticket;
 	private $user_token;
@@ -1100,7 +1100,7 @@ class Wechat
 	 * GET 请求
 	 * @param string $url
 	 */
-	private function http_get($url){
+	public function http_get($url){
 		$oCurl = curl_init();
 		if(stripos($url,"https://")!==FALSE){
 			curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
