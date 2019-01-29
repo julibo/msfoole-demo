@@ -27,7 +27,7 @@ class WechatApi extends Wechat
             $this->access_token = $rs;
             return $rs;
         } else {
-            $this->access_token = $this->http_get('http://localhost/wechat.php');
+            $this->access_token = $this->http_get('http://45.40.202.228/wechat.php');
             $this->setCache($authname, $this->access_token, 3600);
             return $this->access_token;
         }

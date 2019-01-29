@@ -106,7 +106,7 @@ class Wechat extends BaseServer
     public function jumpUrl(string $state, string $openid)
     {
         $url = sprintf('%s/?token=%s&path=%s', Config::get('wechat.baseurl'), $openid, $state);
-        throw new Exception($url . '/?token='.$openid, 301);
+        throw new Exception($url, 301);
     }
 
     /**

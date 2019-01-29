@@ -5,9 +5,9 @@ class Wechat
 
     const AUTH_URL = '/token?grant_type=client_credential&';
 
-    private $appid = 'wx37ba0e17a5e3e7c0';
+    private $appid = 'wx2491c7bdfde11a19';
 
-    private $appsecret = '77a2e6c978f83d9a7d583c94d4a09190';
+    private $appsecret = 'ff32b80489ec6ba36b21ebc45dcab4c8';
 
     private $access_token;
 
