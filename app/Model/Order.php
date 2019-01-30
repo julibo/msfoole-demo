@@ -316,4 +316,33 @@ class Order extends BaseModel
         }
     }
 
+    public function createHospitalOrder($cardNo, $name, $zyh, $money, $zfzl, $openid, $body, $ip, $group = 6, $source = 3, $type = 1)
+    {
+        $nonce_str = Helper::guid();
+        $orderID = $this->getOrderID($cardNo);
+        $info = ['openid' => $openid, 'kh' => $cardNo, 'name'=>$name, 'zyh' => $zyh, 'zfje' => $money, 'zfzl'=> $zfzl, 'sjh' => $orderID];
+        $data = [
+            'out_trade_no' => $orderID,
+            'user' => $cardNo,
+            'group' => $group,
+            'info' => json_encode($info),
+            'type' => $type,
+            'source' => $source,
+            'method' => $zfzl,
+            'body' => $body,
+            'total_fee' => $money * 100,
+            'mch_create_ip' => $ip,
+            'time_start' => date('Y-m-d H:i:s'),
+            'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
+            'nonce_str' => $nonce_str,
+        ];
+        $insertResult = $this->db->data($data)->insert();
+        Log::sql("创建微信住院费预交订单：" . $this->db->getLastSql());
+        if ($insertResult) {
+            return $data;
+        } else {
+            return false;
+        }
+    }
+
 }

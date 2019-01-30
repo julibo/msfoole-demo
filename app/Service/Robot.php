@@ -293,6 +293,8 @@ class Robot extends BaseServer
                                 $this->wehcatRegHandle($order);
                             case 5: // 微信门诊缴费
                                 $this->wechatPayHandle($order);
+                            case 6: // 微信住院费预交
+                                $this->wechatHospitalHandle($order);
                         }
                         return 'success';
                     }
@@ -635,5 +637,68 @@ class Robot extends BaseServer
             }
             Wechat::getInstance()->sendCustomMessageText($info['openid'], $msg);
         }
+    }
+
+    /**
+     * 微信住院费预交
+     * @param array $order
+     */
+    public function wechatHospitalHandle(array $order)
+    {
+        // todo 完成门诊缴费
+        $info = json_decode($order['info'], true);
+        $payResult = $this->payHospital($info, $order['id']);
+        if ($payResult) {
+            // todo 推送模板消息
+            $msg = sprintf('住院费成功预交%f元', $info['zfje'] );
+            Wechat::getInstance()->sendCustomMessageText($info['openid'], $msg);
+        } else {
+            // 原路返回款项
+            $params = [
+                'out_trade_no' => $order['out_trade_no'],
+                'out_refund_no' => $order['out_trade_no'] . 'R',
+                'total_fee' => $order['total_fee'],
+                'refund_fee' => $order['total_fee'],
+                'refund_channel' => 'ORIGINAL',
+                'nonce_str' => Helper::guid()
+            ];
+            $refundResult = PaymentApi::getInstance()->submitRefund($params);
+            if ($refundResult) {
+                OrderModel::getInstance()->updateOrderStatus($order['id'], 5);
+                $msg = '住院费预交失败，款项已原路返回，预计7个工作日到账。';
+            } else {
+                OrderModel::getInstance()->updateOrderStatus($order['id'], 4);
+                $msg = '住院费预交失败，快速退款失败，将转由人工处理，预计7个工作日到账。';
+            }
+            Wechat::getInstance()->sendCustomMessageText($info['openid'], $msg);
+        }
+    }
+
+    /**
+     * 住院费预交
+     * @param array $info
+     * @param int $orderID
+     * @return bool
+     */
+    private function payHospital(array $info, $orderID)
+    {
+        $result = false;
+        $content = [
+            "zyh" => $info['zyh'],
+            "zfje" => $info['zfje'],
+            "zfzl" => $info['zfzl'],
+            "sjh" => $info['sjh']
+        ];
+        Log::info('payHospital:住院费预交发起--{message}', ['message' => json_encode($content)]);
+        $response = $this->hospitalApi->apiClient('zyjk', $content);
+        if (!empty($response) && !empty($response['jksjh'])) {
+            Log::info('payHospital:住院费预交成功--{message},返回记录--{response}', ['message' => json_encode($content), 'response'=>json_encode($response)]);
+            OrderModel::getInstance()->updateOrderStatus($orderID, 2, $response['jksjh']);
+            $result = $response['jksjh'];
+        } else {
+            Log::info('payHospital:住院费预交失败--{message},返回记录--{response}', ['message' => json_encode($content), 'response'=>json_encode($response)]);
+            OrderModel::getInstance()->updateOrderStatus($orderID, 3);
+        }
+        return $result;
     }
 }

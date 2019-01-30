@@ -583,4 +583,76 @@ class MicroWeb extends BaseServer
         return $result;
     }
 
+    /**
+     * 查询住院信息
+     * @param $cardNo
+     * @return mixed
+     * @throws Exception
+     */
+    public function hospitalInfo($cardNo)
+    {
+        if (empty($cardNo)) {
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
+        $response = $this->hospitalApi->apiClient('getzyxx', ['dabh' => $cardNo]);
+        $result = $response['item'][0];
+        return $result;
+    }
+
+    /**
+     * 住院预交费记录
+     * @param $zyh
+     * @return mixed
+     * @throws Exception
+     */
+    public function hospitalDetail($zyh)
+    {
+        if (empty($zyh)) {
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
+        $response = $this->hospitalApi->apiClient('getjkxx', ['zyh' => $zyh]);
+        return $response;
+    }
+
+    /**
+     * 住院费预交订单
+     * @param $cardNo
+     * @param $zyh
+     * @param $money
+     * @param $zfzl
+     * @param $is_raw
+     * @param $openid
+     * @param $body
+     * @param $ip
+     * @return array|bool
+     * @throws Exception
+     */
+    public function payHospital($cardNo, $name, $zyh, $money, $zfzl, $is_raw, $openid, $body, $ip)
+    {
+        if (empty($cardNo) || empty($name) || empty($zyh) || empty($money) || empty($zfzl) || !isset($is_raw)
+            || empty($openid) || empty($body) || empty($ip)) {
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
+        $orderData = OrderModel::getInstance()->createHospitalOrder($cardNo, $name, $zyh, $money, $zfzl, $openid, $body, $ip);
+        if ($orderData == false) {
+            throw new Exception(Feedback::$Exception['SERVICE_SQL_ERROR']['msg'], Feedback::$Exception['SERVICE_SQL_ERROR']['code']);
+        }
+        $orderData['is_raw'] = $is_raw;
+        $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
+        $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
+        $payResult = PaymentApi::getInstance()->createOrder($orderData, $zfzl);
+        if ($payResult == false) {
+            $result = false;
+        } else {
+            $result = [
+                'pay_info' => $payResult['pay_info'],
+                'is_raw' => $is_raw,
+                'token_id' => $payResult['token_id'],
+                'order' => $orderData['out_trade_no'],
+                'cardNo' => $cardNo
+            ];
+        }
+        return $result;
+    }
+
 }
