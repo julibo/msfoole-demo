@@ -258,4 +258,59 @@ class Wechat extends BaseServer
         return $result;
     }
 
+    /**
+     * 住院费预交成功通知
+     * @param $openid
+     * @param $url
+     * @param $name
+     * @param $cardNo
+     * @param $date
+     * @param $money
+     * @param $orderNo
+     * @return mixed
+     */
+    public function sendTemplateHospital($openid, $url, $name, $cardNo, $date, $money, $orderNo)
+    {
+        $template_id = Config::get('wechat.template.hospital');
+
+        $data = [
+            'touser' => $openid,
+            'template_id' => $template_id,
+            'url' => $url,
+            'color' => '#606266',
+            'data' => [
+                'first' => [
+                    'value' => '住院费预交成功',
+                    "color"=>"#67C23A"
+                ],
+                'keyword1' => [
+                    'value' => $name,
+                    "color"=>"#606266"
+                ],
+                'keyword2' => [
+                    'value' => $cardNo,
+                    "color"=>"#606266"
+                ],
+                'keyword3' => [
+                    'value' => $date,
+                    "color"=>"#606266"
+                ],
+                'keyword4' => [
+                    'value' => $money,
+                    "color"=>"#409EFF"
+                ],
+                'keyword5' => [
+                    'value' => $orderNo,
+                    "color"=>"#606266"
+                ],
+                'remark' => [
+                    'value' => '祝您早日康复',
+                    "color"=>"#E6A23C"
+                ],
+            ]
+        ];
+        $result = $this->weObj->sendTemplateMessage($data);
+        return $result;
+    }
+
 }

@@ -650,8 +650,16 @@ class Robot extends BaseServer
         $payResult = $this->payHospital($info, $order['id']);
         if ($payResult) {
             // todo 推送模板消息
-            $msg = sprintf('住院费成功预交%f元', $info['zfje'] );
-            Wechat::getInstance()->sendCustomMessageText($info['openid'], $msg);
+            $openid = $info['openid'];
+            $name = $info['name'];
+            $cardNo = $info['kh'];
+            $date = date('Y-m-d');
+            $money = "￥". $info['zfje'];
+            $orderNo = $info['sjh'];
+            $url = sprintf('%s/?token=%s&path=%s&zyh=%s',
+                Config::get('wechat.baseurl'), $openid, 'hospitalDetail', $info['zyh']);
+            Wechat::getInstance()->sendTemplateHospital($openid, $url, $name, $cardNo, $date, $money, $orderNo);
+
         } else {
             // 原路返回款项
             $params = [
