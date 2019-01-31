@@ -637,6 +637,7 @@ class MicroWeb extends BaseServer
         if ($orderData == false) {
             throw new Exception(Feedback::$Exception['SERVICE_SQL_ERROR']['msg'], Feedback::$Exception['SERVICE_SQL_ERROR']['code']);
         }
+        $orderData['sub_openid'] = $openid;
         $orderData['is_raw'] = $is_raw;
         $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
         $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
@@ -645,7 +646,7 @@ class MicroWeb extends BaseServer
             $result = false;
         } else {
             $result = [
-                'pay_info' => $payResult['pay_info'],
+                'pay_info' => json_decode($payResult['pay_info'], true),
                 'is_raw' => $is_raw,
                 'token_id' => $payResult['token_id'],
                 'order' => $orderData['out_trade_no'],
