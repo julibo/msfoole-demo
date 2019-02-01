@@ -98,7 +98,7 @@ class Index extends BaseController
     {
         $result = [];
         $weekarray = array("日","一","二","三","四","五","六");
-        for($i = 1; $i < 8; $i++) {
+        for($i = 0; $i < 7; $i++) {
             $date = date('Y-m-d', strtotime($i . ' days'));
             $showDate = date('m/d', strtotime($i . ' days'));
             $week = '星期' . $weekarray[date("w", strtotime($i . ' days'))];

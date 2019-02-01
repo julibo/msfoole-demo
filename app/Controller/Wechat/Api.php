@@ -57,14 +57,54 @@ class Api extends BaseController
         $data = array (
       	    'button' => array (
                 0 => array (
-                    'name' => '挂号',
-                    'type' => 'view',
-                    'url' => $this->wechat->getOauthRedirect($callback, 'register'),
+                    'name' => '医院概况',
+                    'sub_button' => array (
+                        0 => array (
+                            'type' => 'view',
+                            'name' => '医院简介',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'intro'),
+                        ),
+                        1 => array (
+                            'type' => 'view',
+                            'name' => '科室介绍',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'department'),
+                        ),
+                        2 => array (
+                            'type' => 'view',
+                            'name' => '名医专家',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'famous'),
+                        ),
+                        3 => array (
+                            'type' => 'view',
+                            'name' => '楼层分布',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'floor'),
+                        ),
+                        4 => array (
+                            'type' => 'view',
+                            'name' => '交通指南',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'guide'),
+                        ),
+                    ),
                 ),
                 1 => array (
-                    'name' => '缴费',
-                    'type' => 'view',
-                    'url' => $this->wechat->getOauthRedirect($callback, 'pay'),
+                    'name' => '诊疗服务',
+                    'sub_button' => array (
+                        0 => array (
+                            'type' => 'view',
+                            'name' => '挂号',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'register'),
+                        ),
+                        1 => array (
+                            'type' => 'view',
+                            'name' => '门诊缴费',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'pay'),
+                        ),
+                        2 => array (
+                            'type' => 'view',
+                            'name' => '住院费预交',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'hospitalization'),
+                        )
+                    ),
                 ),
      	        2 => array (
                     'name' => '我的',
@@ -88,11 +128,6 @@ class Api extends BaseController
                                 'type' => 'view',
                                 'name' => '检查报告',
                                 'url' => $this->wechat->getOauthRedirect($callback, 'report'),
-                            ),
-                            4 => array (
-                                'type' => 'view',
-                                'name' => '住院费预交',
-                                'url' => $this->wechat->getOauthRedirect($callback, 'hospitalization'),
                             ),
                     ),
      	        ),
