@@ -95,7 +95,6 @@ class HospitalApi
         if (preg_match("/^1[3456789]\d{9}$/", $result['dh'])) {
             $result['mobile'] = $result['dh'];
         }
-        $result['mobile'] = '18140106050';
         return $result;
     }
 }

@@ -393,7 +393,7 @@ class Robot extends BaseServer
             $result = $response['item'];
             foreach ($result as &$vo) {
                 $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
-                $vo['je'] = sprintf('￥%s', $vo['je']);
+                $vo['money'] = sprintf('￥%s', $vo['je']);
             }
         }
         return $result;
