@@ -16,11 +16,6 @@ abstract class BaseServer
 
     public static function getInstance() :self
     {
-//        $name = md5(static::class);
-//        if (empty(self::$instance[$name])) {
-//            self::$instance[$name] = new static;
-//        }
-//        return self::$instance[$name];
         return new static;
     }
 

@@ -115,7 +115,14 @@ class WechatCard  extends BaseModel
         return $result;
     }
 
-
+    /**
+     * 查询默认就诊卡
+     * @param string $openid
+     * @return array|\PDOStatement|string|\think\Model|null
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
     public function getDefaultCard(string $openid)
     {
         $result = $this->db

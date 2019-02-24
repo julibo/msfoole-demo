@@ -645,11 +645,10 @@ class Robot extends BaseServer
      */
     public function wechatHospitalHandle(array $order)
     {
-        // todo 完成门诊缴费
         $info = json_decode($order['info'], true);
         $payResult = $this->payHospital($info, $order['id']);
         if ($payResult) {
-            // todo 推送模板消息
+            // 推送模板消息
             $openid = $info['openid'];
             $name = $info['name'];
             $cardNo = $info['kh'];
@@ -659,7 +658,6 @@ class Robot extends BaseServer
             $url = sprintf('%s/?token=%s&path=%s&zyh=%s',
                 Config::get('wechat.baseurl'), $openid, 'hospitalDetail', $info['zyh']);
             Wechat::getInstance()->sendTemplateHospital($openid, $url, $name, $cardNo, $date, $money, $orderNo);
-
         } else {
             // 原路返回款项
             $params = [

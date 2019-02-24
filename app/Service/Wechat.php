@@ -79,7 +79,7 @@ class Wechat extends BaseServer
             }
             $type = $this->weObj->getRevType();
             switch($type) {
-                case WechatApi::MSGTYPE_EVENT: // EVENT_SUBSCRIBE: //  订阅
+                case WechatApi::MSGTYPE_EVENT: // 订阅
                     $eventType = $this->weObj->getRevEvent();
                     if ($eventType['event'] == WechatApi::EVENT_SUBSCRIBE) {
                         $this->subscribe();
@@ -196,7 +196,7 @@ class Wechat extends BaseServer
             'color' => '#606266',
             'data' => [
                 'first' => [
-                    'value' => '预约挂号成功',
+                    'value' => '挂号成功',
                     "color"=>"#67C23A"
                 ],
                 'keyword1' => [
@@ -220,7 +220,7 @@ class Wechat extends BaseServer
                     "color"=>"#606266"
                 ],
                 'remark' => [
-                    'value' => '您的门诊号为'.$mzh.'，请于'.$jzsj.'前来就诊',
+                    'value' => '您的门诊号为 ' . $mzh . '，请于 ' . $jzsj . ' 前来就诊',
                     "color"=>"#E6A23C"
                 ],
             ]
@@ -228,7 +228,6 @@ class Wechat extends BaseServer
         $result = $this->weObj->sendTemplateMessage($data);
         return $result;
     }
-
 
     /**
      * 门诊缴费成功通知
@@ -242,7 +241,6 @@ class Wechat extends BaseServer
     public function sendTemplateMessagePayment($openid, $url, $mzh, $money, $name)
     {
         $template_id = Config::get('wechat.template.payment');
-
         $data = [
             'touser' => $openid,
             'template_id' => $template_id,
@@ -289,7 +287,6 @@ class Wechat extends BaseServer
     public function sendTemplateHospital($openid, $url, $name, $cardNo, $date, $money, $orderNo)
     {
         $template_id = Config::get('wechat.template.hospital');
-
         $data = [
             'touser' => $openid,
             'template_id' => $template_id,

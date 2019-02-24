@@ -91,12 +91,12 @@ class Api extends BaseController
                         0 => array (
                             'type' => 'view',
                             'name' => '当日挂号',
-                            'url' => $this->wechat->getOauthRedirect($callback, 'register'),
+                            'url' => $this->wechat->getOauthRedirect($callback, 'todayReg'),
                         ),
                         1 => array (
                             'type' => 'view',
                             'name' => '预约挂号',
-                            'url' => $this->wechat->getOauthRedirect($callback, 'agree'),
+                            'url' => $this->wechat->getOauthRedirect($callback, 'register'),
                         ),
                         2 => array (
                             'type' => 'view',

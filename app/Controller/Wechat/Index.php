@@ -22,7 +22,7 @@ class Index extends BaseController
     protected function init()
     {
         $this->wechat = MicroWeb::getInstance();
-        $this->wechat->cache = $this->cache;
+        $this->wechat->setCache($this->cache);
     }
 
     /**
@@ -82,6 +82,45 @@ class Index extends BaseController
     }
 
     /**
+     * 查询住院信息
+     */
+    public function hospitalInfo()
+    {
+        $cardNo = $this->params['cardno'] ?? null;
+        $result = $this->wechat->hospitalInfo($cardNo);
+        return $result;
+    }
+
+    /**
+     * 住院预交费记录
+     * @return mixed
+     */
+    public function hospitalDetail()
+    {
+        $zyh = $this->params['zyh'] ?? null;
+        $result = $this->wechat->hospitalDetail($zyh);
+        return $result;
+    }
+
+    /**
+     * 住院预交费订单
+     */
+    public function payHospital()
+    {
+        $cardNo = $this->params['cardno'] ?? null;
+        $name = $this->params['name'] ?? null;
+        $zyh = $this->params['zyh'] ?? null;
+        $money = $this->params['money'] ?? null;
+        $zfzl = $this->params['zfzl'] ?? null;
+        $is_raw = $this->params['is_raw'] ?? null;
+        $openid = $this->user['openid'];
+        $body = "住院费预交";
+        $ip = $this->user['ip'] ?? '127.0.0.1';
+        $result = $this->wechat->payHospital($cardNo, $name, $zyh, $money, $zfzl, $is_raw, $openid, $body, $ip);
+        return $result;
+    }
+
+    /**
      * 获取科室
      */
     public function office()
@@ -98,7 +137,7 @@ class Index extends BaseController
     {
         $result = [];
         $weekarray = array("日","一","二","三","四","五","六");
-        for($i = 0; $i < 7; $i++) {
+        for($i = 1; $i < 8; $i++) {
             $date = date('Y-m-d', strtotime($i . ' days'));
             $showDate = date('m/d', strtotime($i . ' days'));
             $week = '星期' . $weekarray[date("w", strtotime($i . ' days'))];
@@ -264,42 +303,4 @@ class Index extends BaseController
         return $result;
     }
 
-    /**
-     * 查询住院信息
-     */
-    public function hospitalInfo()
-    {
-        $cardNo = $this->params['cardno'] ?? null;
-        $result = $this->wechat->hospitalInfo($cardNo);
-        return $result;
-    }
-
-    /**
-     * 住院预交费记录
-     * @return mixed
-     */
-    public function hospitalDetail()
-    {
-        $zyh = $this->params['zyh'] ?? null;
-        $result = $this->wechat->hospitalDetail($zyh);
-        return $result;
-    }
-
-    /**
-     * 住院预交费订单
-     */
-    public function payHospital()
-    {
-        $cardNo = $this->params['cardno'] ?? null;
-        $name = $this->params['name'] ?? null;
-        $zyh = $this->params['zyh'] ?? null;
-        $money = $this->params['money'] ?? null;
-        $zfzl = $this->params['zfzl'] ?? null;
-        $is_raw = $this->params['is_raw'] ?? null;
-        $openid = $this->user['openid'];
-        $body = "住院费预交";
-        $ip = $this->user['ip'] ?? '127.0.0.1';
-        $result = $this->wechat->payHospital($cardNo, $name, $zyh, $money, $zfzl, $is_raw, $openid, $body, $ip);
-        return $result;
-    }
 }
