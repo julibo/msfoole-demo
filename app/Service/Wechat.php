@@ -36,6 +36,20 @@ class Wechat extends BaseServer
     }
 
     /**
+     * 设置缓存
+     * @param $cache
+     */
+    public function setCache($cache)
+    {
+        $this->cache = $cache;
+    }
+
+    public function setIP($ip)
+    {
+        $this->ip = $ip;
+    }
+
+    /**
      * 参数传递
      * @param string $requestMethod
      * @param $input
@@ -65,8 +79,11 @@ class Wechat extends BaseServer
             }
             $type = $this->weObj->getRevType();
             switch($type) {
-                case WechatApi::EVENT_SUBSCRIBE: //  订阅
-                    $this->subscribe();
+                case WechatApi::MSGTYPE_EVENT: // EVENT_SUBSCRIBE: //  订阅
+                    $eventType = $this->weObj->getRevEvent();
+                    if ($eventType['event'] == WechatApi::EVENT_SUBSCRIBE) {
+                        $this->subscribe();
+                    }
                     break;
                 default:
                     echo "success";

@@ -26,4 +26,3 @@ abstract class BaseServer
 
     abstract protected function init();
 }
-

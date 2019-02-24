@@ -23,10 +23,9 @@ class Api extends BaseController
     protected function init()
     {
         $this->wechat = Wechat::getInstance();
-        $this->wechat->cache = $this->cache;
-        $input = $this->request->input;
-        $this->wechat->setParam($this->request->getRequestMethod(), $input);
-        $this->wechat->ip = $this->request->remote_addr;
+        $this->wechat->setIP($this->request->remote_addr);
+        $this->wechat->setCache($this->cache);
+        $this->wechat->setParam($this->request->getRequestMethod(), $this->request->input);
     }
 
     /**
@@ -62,27 +61,27 @@ class Api extends BaseController
                         0 => array (
                             'type' => 'view',
                             'name' => '医院简介',
-                            'url' => $this->wechat->getOauthRedirect($callback, 'intro'),
+                            'url' => 'https://mp.weixin.qq.com/s/njEgKwbzdqRrEw06GPbgLA',
                         ),
                         1 => array (
                             'type' => 'view',
                             'name' => '科室介绍',
-                            'url' => $this->wechat->getOauthRedirect($callback, 'department'),
+                            'url' => 'https://mp.weixin.qq.com/s/YObnWbM1QrMx7yKVP72kSQ',
                         ),
                         2 => array (
                             'type' => 'view',
                             'name' => '名医专家',
-                            'url' => $this->wechat->getOauthRedirect($callback, 'famous'),
+                            'url' => 'https://mp.weixin.qq.com/s/xHRhW21PJ1ydEm_Y8Ilt3A',
                         ),
                         3 => array (
                             'type' => 'view',
                             'name' => '楼层分布',
-                            'url' => $this->wechat->getOauthRedirect($callback, 'floor'),
+                            'url' => 'https://mp.weixin.qq.com/s/isRsKv_zsU-DgFiNXlS3ww',
                         ),
                         4 => array (
                             'type' => 'view',
                             'name' => '交通指南',
-                            'url' => $this->wechat->getOauthRedirect($callback, 'guide'),
+                            'url' => 'https://mp.weixin.qq.com/s/lrKthj4E1vQ8Zry-KvtQtg',
                         ),
                     ),
                 ),
@@ -91,18 +90,28 @@ class Api extends BaseController
                     'sub_button' => array (
                         0 => array (
                             'type' => 'view',
-                            'name' => '挂号',
+                            'name' => '当日挂号',
                             'url' => $this->wechat->getOauthRedirect($callback, 'register'),
                         ),
                         1 => array (
                             'type' => 'view',
-                            'name' => '门诊缴费',
-                            'url' => $this->wechat->getOauthRedirect($callback, 'pay'),
+                            'name' => '预约挂号',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'agree'),
                         ),
                         2 => array (
                             'type' => 'view',
+                            'name' => '门诊缴费',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'pay'),
+                        ),
+                        3 => array (
+                            'type' => 'view',
                             'name' => '住院费预交',
                             'url' => $this->wechat->getOauthRedirect($callback, 'hospitalization'),
+                        ),
+                        4 => array (
+                            'type' => 'view',
+                            'name' => '健康宣教',
+                            'url' => 'https://mp.weixin.qq.com/s/v0sHVhXD89p3exMJpr1ClA',
                         )
                     ),
                 ),

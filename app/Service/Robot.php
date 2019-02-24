@@ -358,7 +358,7 @@ class Robot extends BaseServer
             OrderModel::getInstance()->updateOrderStatus($orderID, 2, $response['item']['skbs']);
             $result = $response['item'];
         } else {
-            Log::info('register:门诊缴费失败--{message},返回记录--{response}', ['message' => json_encode($content), 'response'=>json_encode($response)]);
+            Log::info('payment:门诊缴费失败--{message},返回记录--{response}', ['message' => json_encode($content), 'response'=>json_encode($response)]);
             OrderModel::getInstance()->updateOrderStatus($orderID, 3);
         }
         return $result;
