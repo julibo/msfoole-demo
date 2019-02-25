@@ -70,7 +70,7 @@ class Api extends BaseController
                         ),
                         2 => array (
                             'type' => 'view',
-                            'name' => '名医专家',
+                            'name' => '医生简介',
                             'url' => 'https://mp.weixin.qq.com/s/xHRhW21PJ1ydEm_Y8Ilt3A',
                         ),
                         3 => array (
@@ -80,8 +80,8 @@ class Api extends BaseController
                         ),
                         4 => array (
                             'type' => 'view',
-                            'name' => '交通指南',
-                            'url' => 'https://mp.weixin.qq.com/s/lrKthj4E1vQ8Zry-KvtQtg',
+                            'name' => '交通导航',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'navigation'),
                         ),
                     ),
                 ),

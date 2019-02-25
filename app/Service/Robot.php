@@ -605,11 +605,11 @@ class Robot extends BaseServer
      */
     public function wechatPayHandle(array $order)
     {
-        // todo 完成门诊缴费
+        // 完成门诊缴费
         $info = json_decode($order['info'], true);
         $payResult = $this->payment($info, $order['id']);
         if ($payResult) {
-            // todo 推送模板消息
+            // 推送模板消息
             $openid = $info['openid'];
             $mzh = $info['mzh'];
             $money = "￥". $info['zfje'];

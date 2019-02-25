@@ -258,7 +258,7 @@ class MicroWeb extends BaseServer
         $response = $this->hospitalApi->apiClient('getyyhy', ['kssj' => $kssj, 'jssj' => $jssj, 'ksbm' => $ksbm]);
         if (!empty($response) && !empty($response['item'])) {
             foreach ($response['item'] as $vo) {
-                if (empty($result[$vo['ysbh']])) {
+                if (!empty($result[$vo['ysbh']])) {
                     $result[$vo['ysbh']] = [
                         'ysbh' => $vo['ysbh'],
                         'ysxm' => $vo['ysxm'],
