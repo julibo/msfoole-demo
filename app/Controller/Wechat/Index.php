@@ -261,9 +261,10 @@ class Index extends BaseController
         $mzh = $this->params['mzh'] ?? null;
         $je = $this->params['je'] ?? null;
         $is_raw = $this->params['is_raw'] ?? null;
+        $zfzl = $this->params['zfzl'] ?? null;
         $body = "门诊缴费";
         $ip = $this->user['ip'] ?? '127.0.0.1';
-        $result = $this->wechat->createPayOrder($openid, $cardNo, $name, $mzh, $je, $is_raw, $body, $ip);
+        $result = $this->wechat->createPayOrder($openid, $cardNo, $name, $mzh, $je, $zfzl, $is_raw, $body, $ip);
         return $result;
     }
 
