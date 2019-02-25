@@ -29,6 +29,16 @@ class Api extends BaseController
     }
 
     /**
+     * JS-SDK签名
+     * @return mixed
+     */
+    public function signature()
+    {
+        $url = $this->params['url'];
+        return $this->wechat->getJsSign($url);
+    }
+
+    /**
      * @return mixed
      */
     public function index()
