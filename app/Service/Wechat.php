@@ -252,7 +252,7 @@ class Wechat extends BaseServer
                     "color"=>"#67C23A"
                 ],
                 'keyword1' => [
-                    'value' => $mzh,
+                    'value' => '普通门诊',
                     "color"=>"#606266"
                 ],
                 'keyword2' => [
