@@ -560,7 +560,7 @@ class Robot extends BaseServer
         }
         if ($result) {
             OrderModel::getInstance()->updateOrderStatus($order['id'], 2, $responseQh['mzh']);
-            // todo 推送模板消息
+            // 推送模板消息
             if ($info['ysh_lx'] == 1) {
                 $jzsj = $info['ghrq'] . " 上午";
             } else if ($info['ysh_lx'] == 2) {
@@ -570,7 +570,7 @@ class Robot extends BaseServer
             }
             $openid = $info['openid'];
             $name = $info['name'];
-            $cardNo = $info['cardno'];
+            $cardNo = $info['kh'];
             $ksmc = $info['zzksmc'];
             $ysxm = $info['ysxm'];
             $mzh = $responseQh['mzh'];

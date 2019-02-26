@@ -258,7 +258,7 @@ class MicroWeb extends BaseServer
         $response = $this->hospitalApi->apiClient('getyyhy', ['kssj' => $kssj, 'jssj' => $jssj, 'ksbm' => $ksbm]);
         if (!empty($response) && !empty($response['item'])) {
             foreach ($response['item'] as $vo) {
-                if (!empty($result[$vo['ysbh']])) {
+                if (empty($result[$vo['ysbh']])) {
                     $result[$vo['ysbh']] = [
                         'ysbh' => $vo['ysbh'],
                         'ysxm' => $vo['ysxm'],
@@ -268,8 +268,8 @@ class MicroWeb extends BaseServer
                         'zzksmc' => $vo['zzksmc'],
                         'ghf' => $vo['ghf'],
                         'xh' => $vo['xh'],
-                        'photo' => $vo['photoUrl'],
-                        'intro' => $vo['__COLUMN1'] ? mb_substr($vo['__COLUMN1'], 0, 120, 'utf-8') : '',
+                        'photo' => $vo['photoUrl'] ?? '',
+                        'intro' => empty($vo['__COLUMN1']) ? '' : mb_substr($vo['__COLUMN1'], 0, 120, 'utf-8'),
                     ];
                     $result[$vo['ysbh']]['plan'] = [];
                 }
@@ -437,13 +437,30 @@ class MicroWeb extends BaseServer
         $cards = WechatCardModel::getInstance()->getBindCard($openid);
         if (!empty($cards)) {
             foreach ($cards as $card) {
-                $response = $this->hospitalApi->apiClient('yydjcx', ['kh' => $card['cardno']]);
-                if (!empty($response) && !empty($response['item'])) {
-                    foreach ($response['item'] as &$vo) {
-                        $vo['cardno'] = $card['cardno'];
+                try {
+                    $response = $this->hospitalApi->apiClient('yydjcx', ['kh' => $card['cardno']]);
+                    if (!empty($response) && !empty($response['item'])) {
+                        foreach ($response['item'] as &$vo) {
+                            $vo['cardno'] = $card['cardno'];
+                            $vo['type'] = 0;
+                            if (!empty($vo['ghrq'])) {
+                                $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
+                            }
+                        }
+                        $result = array_merge($result, $response['item']);
                     }
-                    $result = array_merge($result, $response['item']);
-                }
+                    $response = $this->hospitalApi->apiClient('ghxx', ['kh' => $card['cardno']]);
+                    if (!empty($response) && !empty($response['item'])) {
+                        foreach ($response['item'] as &$vo) {
+                            $vo['cardno'] = $card['cardno'];
+                            $vo['xm'] = $vo['byxm'];
+                            $vo['ysh'] = '无';
+                            $vo['type'] = 1;
+                            $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
+                        }
+                        $result = array_merge($result, $response['item']);
+                    }
+                } catch (\Exception $e) {}
             }
         }
         return $result;
