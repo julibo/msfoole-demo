@@ -286,7 +286,20 @@ class Order extends BaseModel
         }
     }
 
-
+    /**
+     * @param $openid
+     * @param $cardNo
+     * @param $name
+     * @param $mzh
+     * @param $zfje
+     * @param $zfzl
+     * @param $body
+     * @param $ip
+     * @param int $group
+     * @param int $source
+     * @param int $type
+     * @return array|bool
+     */
     public function createWechatPayOrder($openid, $cardNo, $name, $mzh, $zfje, $zfzl, $body, $ip, $group = 5, $source = 3, $type = 1)
     {
         $nonce_str = Helper::guid();
@@ -316,6 +329,20 @@ class Order extends BaseModel
         }
     }
 
+    /**
+     * @param $cardNo
+     * @param $name
+     * @param $zyh
+     * @param $money
+     * @param $zfzl
+     * @param $openid
+     * @param $body
+     * @param $ip
+     * @param int $group
+     * @param int $source
+     * @param int $type
+     * @return array|bool
+     */
     public function createHospitalOrder($cardNo, $name, $zyh, $money, $zfzl, $openid, $body, $ip, $group = 6, $source = 3, $type = 1)
     {
         $nonce_str = Helper::guid();
@@ -338,6 +365,58 @@ class Order extends BaseModel
         ];
         $insertResult = $this->db->data($data)->insert();
         Log::sql("创建微信住院费预交订单：" . $this->db->getLastSql());
+        if ($insertResult) {
+            return $data;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @param $openid
+     * @param $cardNo
+     * @param $name
+     * @param $ysbh
+     * @param $bb
+     * @param $zfje
+     * @param $zfzl
+     * @param $ksbm
+     * @param $ksmc
+     * @param $ysxm
+     * @param $bbmc
+     * @param $ghlb
+     * @param $lbmc
+     * @param $ip
+     * @param $body
+     * @param int $group
+     * @param int $source
+     * @param int $type
+     * @return array|bool
+     */
+    public function createWechatTodayOrder($openid, $cardNo, $name, $ysbh, $bb, $zfje, $zfzl, $ksbm, $ksmc, $ysxm, $bbmc, $ghlb, $lbmc, $ip, $body, $group = 7, $source = 3, $type = 1)
+    {
+        $nonce_str = Helper::guid();
+        $orderID = $this->getOrderID($cardNo);
+        $info = ['openid' => $openid, 'kh' => $cardNo, 'name' => $name, 'ysbh' => $ysbh, 'bb' => $bb, 'zfje' => $zfje, 'zfzl'=> $zfzl,
+            'ksbm' => $ksbm, 'ksmc' => $ksmc, 'ysxm' => $ysxm, 'bbmc' => $bbmc, 'lbmc' => $lbmc, 'ghlb' => $ghlb,
+            'sjh' => $orderID];
+        $data = [
+            'out_trade_no' => $orderID,
+            'user' => $cardNo,
+            'group' => $group,
+            'info' => json_encode($info),
+            'type' => $type,
+            'source' => $source,
+            'method' => $zfzl,
+            'body' => $body,
+            'total_fee' => $zfje * 100,
+            'mch_create_ip' => $ip,
+            'time_start' => date('Y-m-d H:i:s'),
+            'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
+            'nonce_str' => $nonce_str,
+        ];
+        $insertResult = $this->db->data($data)->insert();
+        Log::sql("创建微信挂号订单：" . $this->db->getLastSql());
         if ($insertResult) {
             return $data;
         } else {

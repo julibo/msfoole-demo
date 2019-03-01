@@ -442,21 +442,9 @@ class MicroWeb extends BaseServer
                     if (!empty($response) && !empty($response['item'])) {
                         foreach ($response['item'] as &$vo) {
                             $vo['cardno'] = $card['cardno'];
-                            $vo['type'] = 0;
                             if (!empty($vo['ghrq'])) {
                                 $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
                             }
-                        }
-                        $result = array_merge($result, $response['item']);
-                    }
-                    $response = $this->hospitalApi->apiClient('ghxx', ['kh' => $card['cardno']]);
-                    if (!empty($response) && !empty($response['item'])) {
-                        foreach ($response['item'] as &$vo) {
-                            $vo['cardno'] = $card['cardno'];
-                            $vo['xm'] = $vo['byxm'];
-                            $vo['ysh'] = '无';
-                            $vo['type'] = 1;
-                            $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
                         }
                         $result = array_merge($result, $response['item']);
                     }
@@ -688,6 +676,90 @@ class MicroWeb extends BaseServer
             }
         }
         return $result;
+    }
+
+    /**
+     * 获取值班医生列表
+     * @param $ksbm
+     * @return array
+     */
+    public function getDoctor($ksbm)
+    {
+        $result = [];
+//        $response = $this->hospitalApi->apiClient('ysxx', ['ksbm' => $ksbm]);
+//        if (!empty($response) && !empty($response['item'])) {
+//            $result = $response['item'];
+//        }
+        $result = json_decode('[{"ghs":"50","photoUrl":"http:\\/\\/cdfzyz.xicp.net:38700\\/zykc\\/image\\/1.jpg","xm":"系统用户1","bb":"2","ysjs":"好大夫在线,能找到19万公立医院医生的医疗平台。汇集全国19万+优质医疗权威专家,为患者提供网上看病、挂专家号,在线开药,线上买药,线上复诊,网络预约手术等全方位快速问医生旗下有问必答网是优秀的医生在线健康问答咨询平台。来自全国数万名医生为您免费解答任何健康问题,可以通过电话、文字等多种方式与医生进行一对一咨询!","ysbh":"1","syhs":"60","lbmc":"主任医师","ghlb":"1","ghfy":"11","bbmc":"上午班"},{"ghs":"50","photoUrl":"http:\\/\\/cdfzyz.xicp.net:38700\\/zykc\\/image\\/1.jpgimage\\/2.jpg","xm":"高智三","bb":"1","ysjs":"医生技术哦","ysbh":"2","syhs":"60","lbmc":"主任医师","ghlb":"1","bbmc":"全班","ghfy":"11"},{"ghs":"50","photoUrl":"http:\\/\\/cdfzyz.xicp.net:38700\\/zykc\\/image\\/1.jpgimage\\/2.jpgimage\\/35.jpg","xm":"陈永朴","bb":"1","ysjs":"","ysbh":"35","syhs":"60","lbmc":"主任医师","ghlb":"1","bbmc":"全班","ghfy":"0.01"}]', true);
+        foreach ($result as &$vo) {
+            $vo['ysjs'] = empty($vo['ysjs']) ? '' : mb_substr($vo['ysjs'], 0, 60, 'utf-8');
+        }
+        return $result;
+    }
+
+    /**
+     * @param $openid
+     * @param $cardNo
+     * @param $name
+     * @param $ysbh
+     * @param $bb
+     * @param $zfje
+     * @param $zfzl
+     * @param $ksbm
+     * @param $ksmc
+     * @param $ysxm
+     * @param $bbmc
+     * @param $lbmc
+     * @param $is_raw
+     * @param $ip
+     * @param $body
+     * @return array|bool
+     * @throws Exception
+     */
+    public function createTodayOrder($openid, $cardNo, $name, $ysbh, $bb, $zfje, $zfzl, $ksbm, $ksmc, $ysxm, $bbmc, $ghlb, $lbmc, $is_raw, $ip, $body)
+    {
+        if (empty($openid) || empty($cardNo) || empty($ysbh) || empty($bb) || empty($zfje) || empty($zfzl) || empty($ksbm) || empty($ksmc) ||
+            empty($ysxm) || empty($bbmc) || empty($bbmc) || empty($ghlb) || empty($lbmc) || empty($body) || !isset($is_raw) || empty($ip)) {
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
+        $orderData = OrderModel::getInstance()->createWechatTodayOrder($openid, $cardNo, $name, $ysbh, $bb, $zfje, $zfzl, $ksbm, $ksmc, $ysxm, $bbmc, $ghlb, $lbmc, $ip, $body);
+        if ($orderData == false) {
+            throw new Exception(Feedback::$Exception['SERVICE_SQL_ERROR']['msg'], Feedback::$Exception['SERVICE_SQL_ERROR']['code']);
+        }
+        $orderData['sub_openid'] = $openid;
+        $orderData['is_raw'] = $is_raw;
+        $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
+        $orderData['time_expire'] = date('YmdHis', strtotime($orderData['time_expire']));
+        $payResult = PaymentApi::getInstance()->createOrder($orderData, $zfzl);
+        if ($payResult == false) {
+            $result = false;
+        } else {
+            $result = [
+                'pay_info' => json_decode($payResult['pay_info'], true),
+                'is_raw' => $is_raw,
+                'token_id' => $payResult['token_id'],
+                'order' => $orderData['out_trade_no'],
+                'cardNo' => $cardNo
+            ];
+        }
+        return $result;
+    }
+
+    /**
+     * 查询订单结果
+     * @param $cardNo
+     * @param $orderNo
+     * @return array
+     * @throws Exception
+     */
+    public function showTodayResult($cardNo, $orderNo)
+    {
+        $order = OrderModel::getInstance()->getOrderByTradeAndCard($cardNo, $orderNo);
+        if (empty($order)) {
+            throw new Exception('订单没有找到', Feedback::$Exception['HANDLE_DADA_CHECK']['code']);
+        }
+        $order['info'] = json_decode($order['info'], true);
+        return $order;
     }
 
 }

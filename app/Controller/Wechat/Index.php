@@ -304,4 +304,52 @@ class Index extends BaseController
         return $result;
     }
 
+    /**
+     * 获取科室医生
+     * @return mixed
+     */
+    public function getDoctor()
+    {
+        $ksbm = $this->params['ksbm'] ?? null;
+        $result = $this->wechat->getDoctor($ksbm);
+        return $result;
+    }
+
+    /**
+     * 创建当日挂号订单
+     * @return mixed
+     */
+    public function createTodayOrder()
+    {
+        $openid = $this->user['openid'];
+        $cardno = $this->params['cardno'] ?? null;
+        $name = $this->params['name'] ?? null;
+        $ysbh = $this->params['ysbh'] ?? null;
+        $bb = $this->params['bb'] ?? null;
+        $zfje = $this->params['zfje'] ?? null;
+        $zfzl = $this->params['zfzl'] ?? null;
+        $ksbm = $this->params['ksbm'] ?? null;
+        $ksmc = $this->params['ksmc'] ?? null;
+        $ysxm = $this->params['ysxm'] ?? null;
+        $bbmc = $this->params['bbmc'] ?? null;
+        $ghlb = $this->params['ghlb'] ?? null;
+        $lbmc = $this->params['lbmc'] ?? null;
+        $is_raw = $this->params['is_raw'] ?? 1;
+        $body = '微信挂号费';
+        $ip = $this->user['ip'] ?? '127.0.0.1';
+        $result = $this->wechat->createTodayOrder($openid, $cardno, $name, $ysbh, $bb, $zfje, $zfzl, $ksbm, $ksmc, $ysxm, $bbmc, $ghlb, $lbmc, $is_raw, $ip, $body);
+        return $result;
+    }
+
+    /**
+     * 查询当日挂号订单
+     */
+    public function showTodayResult()
+    {
+        $cardNo = $this->params['cardno'];
+        $orderNo = $this->params['order'] ?? null;
+        $result = $this->wechat->showTodayResult($cardNo, $orderNo);
+        return $result;
+    }
+
 }
