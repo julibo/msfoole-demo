@@ -686,11 +686,10 @@ class MicroWeb extends BaseServer
     public function getDoctor($ksbm)
     {
         $result = [];
-//        $response = $this->hospitalApi->apiClient('ysxx', ['ksbm' => $ksbm]);
-//        if (!empty($response) && !empty($response['item'])) {
-//            $result = $response['item'];
-//        }
-        $result = json_decode('[{"ghs":"50","photoUrl":"http:\\/\\/cdfzyz.xicp.net:38700\\/zykc\\/image\\/1.jpg","xm":"系统用户1","bb":"2","ysjs":"好大夫在线,能找到19万公立医院医生的医疗平台。汇集全国19万+优质医疗权威专家,为患者提供网上看病、挂专家号,在线开药,线上买药,线上复诊,网络预约手术等全方位快速问医生旗下有问必答网是优秀的医生在线健康问答咨询平台。来自全国数万名医生为您免费解答任何健康问题,可以通过电话、文字等多种方式与医生进行一对一咨询!","ysbh":"1","syhs":"60","lbmc":"主任医师","ghlb":"1","ghfy":"11","bbmc":"上午班"},{"ghs":"50","photoUrl":"http:\\/\\/cdfzyz.xicp.net:38700\\/zykc\\/image\\/1.jpgimage\\/2.jpg","xm":"高智三","bb":"1","ysjs":"医生技术哦","ysbh":"2","syhs":"60","lbmc":"主任医师","ghlb":"1","bbmc":"全班","ghfy":"11"},{"ghs":"50","photoUrl":"http:\\/\\/cdfzyz.xicp.net:38700\\/zykc\\/image\\/1.jpgimage\\/2.jpgimage\\/35.jpg","xm":"陈永朴","bb":"1","ysjs":"","ysbh":"35","syhs":"60","lbmc":"主任医师","ghlb":"1","bbmc":"全班","ghfy":"0.01"}]', true);
+        $response = $this->hospitalApi->apiClient('ysxx', ['ksbm' => $ksbm]);
+        if (!empty($response) && !empty($response['item'])) {
+            $result = $response['item'];
+        }
         foreach ($result as &$vo) {
             $vo['ysjs'] = empty($vo['ysjs']) ? '' : mb_substr($vo['ysjs'], 0, 60, 'utf-8');
         }
