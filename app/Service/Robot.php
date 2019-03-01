@@ -714,7 +714,7 @@ class Robot extends BaseServer
      * 微信挂号处理
      * @param array $order
      */
-    public function wehcatTodayHandle(array $order)
+    public function wechatTodayHandle(array $order)
     {
         // 完成预约挂号
         $result = false;
