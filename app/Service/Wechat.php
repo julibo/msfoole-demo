@@ -196,7 +196,7 @@ class Wechat extends BaseServer
             'color' => '#606266',
             'data' => [
                 'first' => [
-                    'value' => '挂号成功',
+                    'value' => '预约挂号成功',
                     "color"=>"#67C23A"
                 ],
                 'keyword1' => [
@@ -319,6 +319,61 @@ class Wechat extends BaseServer
                 ],
                 'remark' => [
                     'value' => '祝您早日康复',
+                    "color"=>"#E6A23C"
+                ],
+            ]
+        ];
+        $result = $this->weObj->sendTemplateMessage($data);
+        return $result;
+    }
+
+    /**
+     * 当日挂号成功通知
+     * @param $openid
+     * @param $url
+     * @param $name
+     * @param $cardNo
+     * @param $ksmc
+     * @param $ysxm
+     * @param $jzsj
+     * @param $mzh
+     * @return mixed
+     */
+    public function sendTemplateMessageToday($openid, $url, $name, $cardNo, $ksmc, $ysxm, $jzsj, $mzh)
+    {
+        $template_id = Config::get('wechat.template.today');
+        $data = [
+            'touser' => $openid,
+            'template_id' => $template_id,
+            'url' => $url,
+            'color' => '#606266',
+            'data' => [
+                'first' => [
+                    'value' => '当日挂号成功',
+                    "color"=>"#67C23A"
+                ],
+                'keyword1' => [
+                    'value' => $name,
+                    "color"=>"#606266"
+                ],
+                'keyword2' => [
+                    'value' => $ksmc,
+                    "color"=>"#606266"
+                ],
+                'keyword3' => [
+                    'value' => $ysxm,
+                    "color"=>"#606266"
+                ],
+                'keyword4' => [
+                    'value' => $jzsj,
+                    "color"=>"#606266"
+                ],
+                'keyword5' => [
+                    'value' => '就诊卡',
+                    "color"=>"#606266"
+                ],
+                'remark' => [
+                    'value' => '您的门诊号为 ' . $mzh . '，请持就诊卡（'.$cardNo.'）按时就诊',
                     "color"=>"#E6A23C"
                 ],
             ]
