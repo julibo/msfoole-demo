@@ -20,8 +20,12 @@ class Sale extends BaseServer
 
     protected function init()
     {
-        // TODO: Implement init() method.
         $this->hospitalApi = HospitalApi::getInstance();
+    }
+
+    public function setCache($cache)
+    {
+        $this->cache = $cache;
     }
 
     /**
@@ -90,14 +94,14 @@ class Sale extends BaseServer
     }
 
     /**
-     * 取消预约 ？？？？？
+     * 取消预约
      * @param string $hybh
      * @param string $sjh
      * @return bool
      * @throws Exception
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function cancelNo(string $hybh, string $sjh)
+    public function cancelNo($hybh, $sjh)
     {
         if (empty($hybh)) {
             throw new Exception('缺少必要的参数', 22);
@@ -135,7 +139,6 @@ class Sale extends BaseServer
             return true;
         }
     }
-
 
     /**
      * 获取医院科室列表

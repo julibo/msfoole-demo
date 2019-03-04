@@ -15,7 +15,7 @@ class Sale extends BaseController
     protected function init()
     {
         $this->server = SaleService::getInstance();
-        $this->server->cache = $this->cache;
+        $this->server->setCache($this->cache);
     }
 
     /**
@@ -39,7 +39,7 @@ class Sale extends BaseController
      }
 
     /**
-     * 取消预约 ？？？？
+     * 取消预约
      */
     public function cancel()
     {
@@ -111,7 +111,7 @@ class Sale extends BaseController
         $ghf = $this->params['ghf'] ?? null;
         $zfzl = $this->params['zfzl'] ?? null;
         $ip = $this->user->ip ?? '127.0.0.1';
-        $body = '挂号费';
+        $body = '预约挂号费';
         $result = SaleService::getInstance()->createOrder($kh, $ysbh, $zzks, $ghrq, $ghlb, $ysh_lx, $zfzl, $ghf, $ip, $body);
         return $result;
     }
@@ -126,6 +126,4 @@ class Sale extends BaseController
         $result = SaleService::getInstance()->getOrder($cardNo, $tradeNo);
         return $result;
     }
-
-
 }
