@@ -190,8 +190,8 @@ class Sale extends BaseServer
                         'zzksmc' => $vo['zzksmc'],
                         'ghf' => $vo['ghf'],
                         'xh' => $vo['xh'],
-                        'photo' => $vo['photoUrl'],
-                        'intro' => $vo['__COLUMN1'] ? mb_substr($vo['__COLUMN1'], 0, 120, 'utf-8') : '',
+                        'photo' => empty($vo['photoUrl']) ? '' : $vo['photoUrl'],
+                        'intro' => empty($vo['__COLUMN1']) ? '' : mb_substr($vo['__COLUMN1'], 0, 120, 'utf-8'),
                     ];
                     $result[$vo['ysbh']]['plan'] = [];
                 }
