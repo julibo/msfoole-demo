@@ -135,7 +135,7 @@ class Api extends BaseController
                             ),
                             1 => array (
                                 'type' => 'view',
-                                'name' => '挂号记录',
+                                'name' => '预约挂号记录',
                                 'url' => $this->wechat->getOauthRedirect($callback, 'regRecord'),
                             ),
                             2 => array (

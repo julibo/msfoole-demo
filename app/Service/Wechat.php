@@ -238,7 +238,7 @@ class Wechat extends BaseServer
      * @param $name
      * @return mixed
      */
-    public function sendTemplateMessagePayment($openid, $url, $mzh, $money, $name)
+    public function sendTemplateMessagePayment($openid, $url, $skbs, $money, $name)
     {
         $template_id = Config::get('wechat.template.payment');
         $data = [
@@ -252,7 +252,7 @@ class Wechat extends BaseServer
                     "color"=>"#67C23A"
                 ],
                 'keyword1' => [
-                    'value' => '普通门诊',
+                    'value' => $skbs,
                     "color"=>"#606266"
                 ],
                 'keyword2' => [
