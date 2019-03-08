@@ -38,6 +38,9 @@ class Index extends BaseController
     public function getCode()
     {
         $number = $this->params['number'] ?? null;
+        if ($number) {
+            $number = str_pad($number,8,'0',STR_PAD_LEFT);
+        }
         $result = $this->server->getCode($number);
         return $result;
     }
@@ -49,6 +52,9 @@ class Index extends BaseController
     {
         $result = false;
         $number = $this->params['number'] ?? null;
+        if ($number) {
+            $number = str_pad($number,8,'0',STR_PAD_LEFT);
+        }
         $code = $this->params['code'] ?? null;
         $user = $this->server->login($number, $code);
         if ($user) {
