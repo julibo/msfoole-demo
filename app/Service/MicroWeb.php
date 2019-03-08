@@ -54,9 +54,9 @@ class MicroWeb extends BaseServer
             empty($params['mobile'])) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
-        $cardNo =  str_pad($params['cardno'],8,'0',STR_PAD_LEFT);
+        $params['cardno'] =  str_pad($params['cardno'],8,'0',STR_PAD_LEFT);
         // 通过卡号查询用户信息
-        $user = $this->hospitalApi->getUser($cardNo);
+        $user = $this->hospitalApi->getUser($params['cardno']);
         if (empty($user) || $user['xm'] != $params['name']) {
             throw new Exception('卡号与姓名不匹配', Feedback::$Exception['SERVICE_DATA_ERROR']['code']);
         }
@@ -64,7 +64,7 @@ class MicroWeb extends BaseServer
         $params['default'] = 1;
         if (!empty($list)) {
             foreach ($list as $v) {
-                if ($v['cardno'] == $cardNo) {
+                if ($v['cardno'] == $params['cardno']) {
                     throw new Exception('该卡已被绑定', Feedback::$Exception['SERVICE_DATA_ERROR']['code']);
                 }
                 if ($v['default'] == 1) {
