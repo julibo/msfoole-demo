@@ -67,6 +67,8 @@ class Order extends BaseModel
             'time_start' => date('Y-m-d H:i:s'),
             'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,
+            'months' => date('Ym'),
+            'dates' => date('Ymd'),
         ];
         $insertResult = $this->db->data($data)->insert();
         Log::sql("创建挂号订单：" . $this->db->getLastSql());
@@ -342,6 +344,8 @@ class Order extends BaseModel
             'time_start' => date('Y-m-d H:i:s'),
             'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,
+            'months' => date('Ym'),
+            'dates' => date('Ymd'),
         ];
         $insertResult = $this->db->data($data)->insert();
         Log::sql("创建缴费订单：" . $this->db->getLastSql());
@@ -388,6 +392,8 @@ class Order extends BaseModel
             'time_start' => date('Y-m-d H:i:s'),
             'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,
+            'months' => date('Ym'),
+            'dates' => date('Ymd'),
         ];
         $insertResult = $this->db->data($data)->insert();
         Log::sql("创建挂号订单：" . $this->db->getLastSql());
@@ -454,6 +460,8 @@ class Order extends BaseModel
             'time_start' => date('Y-m-d H:i:s'),
             'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,
+            'months' => date('Ym'),
+            'dates' => date('Ymd'),
         ];
         $insertResult = $this->db->data($data)->insert();
         Log::sql("创建预约挂号订单：" . $this->db->getLastSql());
@@ -497,6 +505,8 @@ class Order extends BaseModel
             'time_start' => date('Y-m-d H:i:s'),
             'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,
+            'months' => date('Ym'),
+            'dates' => date('Ymd'),
         ];
         $insertResult = $this->db->data($data)->insert();
         Log::sql("创建微信门诊缴费订单：" . $this->db->getLastSql());
@@ -540,6 +550,8 @@ class Order extends BaseModel
             'time_start' => date('Y-m-d H:i:s'),
             'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,
+            'months' => date('Ym'),
+            'dates' => date('Ymd'),
         ];
         $insertResult = $this->db->data($data)->insert();
         Log::sql("创建微信住院费预交订单：" . $this->db->getLastSql());
@@ -592,6 +604,8 @@ class Order extends BaseModel
             'time_start' => date('Y-m-d H:i:s'),
             'time_expire' => date('Y-m-d H:i:s', strtotime('10 minute')),
             'nonce_str' => $nonce_str,
+            'months' => date('Ym'),
+            'dates' => date('Ymd'),
         ];
         $insertResult = $this->db->data($data)->insert();
         Log::sql("创建微信挂号订单：" . $this->db->getLastSql());
