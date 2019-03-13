@@ -291,12 +291,16 @@ class Robot extends BaseServer
                                 break;
                             case 4: // 微信预约挂号
                                 $this->wehcatRegHandle($order);
+                                break;
                             case 5: // 微信门诊缴费
                                 $this->wechatPayHandle($order);
+                                break;
                             case 6: // 微信住院费预交
                                 $this->wechatHospitalHandle($order);
+                                break;
                             case 7: // 微信挂号
                                 $this->wechatTodayHandle($order);
+                                break;
                         }
                         return 'success';
                     }

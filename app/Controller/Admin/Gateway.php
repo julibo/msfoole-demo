@@ -18,6 +18,10 @@ class Gateway extends BaseController
         $this->server->setCache($this->cache);
     }
 
+    /**
+     * 网关登录
+     * @return bool
+     */
     public function login()
     {
         $result = false;

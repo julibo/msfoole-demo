@@ -5,6 +5,7 @@
 
 namespace App\Model;
 
+use think\Db;
 use Julibo\Msfoole\Helper;
 use Julibo\Msfoole\Facade\Log;
 
@@ -91,6 +92,183 @@ class Order extends BaseModel
             ->find();
         Log::sql("根据单号查询订单：" . $this->db->getLastSql());
         return $result;
+    }
+
+    /**
+     * 订单列表查询
+     * @param array $condition
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getOrderList(array $condition, $pageNo, $pageSize)
+    {
+        $query = $this->db
+            ->where('dates', 'between', [$condition['from'], $condition['to']])
+            ->where('status', 2);
+        if (!empty($condition['group'])) {
+            $query->where('group', 'in', $condition['group']);
+        }
+        if (!empty($condition['source'])) {
+            $query->where('source', '=', $condition['source']);
+        }
+        if (!empty($condition['user'])) {
+            $query->where('user', '=', $condition['user']);
+        }
+        if (!empty($condition['out_trade_no'])) {
+            $query->where('out_trade_no', '=', $condition['out_trade_no']);
+        }
+        if (!empty($condition['code'])) {
+            $query->where('code', '=', $condition['code']);
+        }
+        $result = $query->order('create_time', 'desc')
+            ->page($pageNo, $pageSize)
+            ->select();
+        Log::sql("后台成交订单查询：" . $this->db->getLastSql());
+        $total = $query->count('id');
+        $sum = $query->sum('total_fee');
+        return [
+            'total' => $total,
+            'result' => $result,
+            'sum' => $sum
+        ];
+    }
+
+    /**
+     * 退款订单
+     * @param array $condition
+     * @param $pageNo
+     * @param $pageSize
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getOrderRefund(array $condition, $pageNo, $pageSize)
+    {
+        $query = $this->db
+            ->whereTime('update_time', [$condition['from'], $condition['to']])
+            ->where('status', 5);
+        if (!empty($condition['group'])) {
+            $query->where('group', 'in', $condition['group']);
+        }
+        if (!empty($condition['source'])) {
+            $query->where('source', '=', $condition['source']);
+        }
+        if (!empty($condition['user'])) {
+            $query->where('user', '=', $condition['user']);
+        }
+        if (!empty($condition['out_trade_no'])) {
+            $query->where('out_trade_no', '=', $condition['out_trade_no']);
+        }
+        $result = $query->order('create_time', 'desc')
+            ->page($pageNo, $pageSize)
+            ->select();
+        $total = $query->count('id');
+        Log::sql("后台退款订单查询：" . $this->db->getLastSql());
+        return [
+            'total' => $total,
+            'result' => $result
+        ];
+    }
+
+    /**
+     * 异常订单
+     * @param array $condition
+     * @param $pageNo
+     * @param $pageSize
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getOrderAbnormal(array $condition, $pageNo, $pageSize)
+    {
+        $query = $this->db
+            ->where('dates', 'between', [$condition['from'], $condition['to']])
+            ->where('status', 'in', [1, 3, 4]);
+        if (!empty($condition['group'])) {
+            $query->where('group', 'in', $condition['group']);
+        }
+        if (!empty($condition['source'])) {
+            $query->where('source', '=', $condition['source']);
+        }
+        if (!empty($condition['user'])) {
+            $query->where('user', '=', $condition['user']);
+        }
+        if (!empty($condition['out_trade_no'])) {
+            $query->where('out_trade_no', '=', $condition['out_trade_no']);
+        }
+        $result = $query->order('create_time', 'desc')
+            ->page($pageNo, $pageSize)
+            ->select();
+        $total = $query->count('id');
+        Log::sql("后台异常订单查询：" . $this->db->getLastSql());
+        return [
+            'total' => $total,
+            'result' => $result
+        ];
+    }
+
+    /**
+     * 异常订单统计
+     * @return int|string
+     */
+    public function getAbnormalCount()
+    {
+        $query = $this->db
+            ->where('status', 'in', [1, 3, 4]);
+        $total = $query->count('id');
+        Log::sql("后台异常订单统计：" . $this->db->getLastSql());
+        return $total;
+    }
+
+    /**
+     * 统计月报
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getReportMonthly()
+    {
+        $month = sprintf('%s%s', date('Y') - 2, date('m'));
+        $result = $this->db
+            ->field('months, sum(total_fee) as total_fee')
+            ->where('months', '>', $month)
+            ->where('status', 2)
+            ->order('months', 'desc')
+            ->group('months')
+            ->select();
+        Log::sql("后台订单月报：" . $this->db->getLastSql());
+        return $result;
+    }
+
+    /**
+     * 统计日报
+     * @param $pageNo
+     * @param $pageSize
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getReportDaily($pageNo, $pageSize)
+    {
+        $result = $this->db
+            ->field('dates, sum(total_fee) as total_fee')
+            ->where('status', 2)
+            ->group('dates')
+            ->order('dates', 'desc')
+            ->page($pageNo, $pageSize)
+            ->select();
+        $total = Db::query("select count(*) as total from (select `dates` from `bx_orders` where status = 2 group by dates) a");
+        Log::sql("后台订单日报：" . $this->db->getLastSql());
+        return [
+            'total' => $total[0]['total'] ?? 0,
+            'result' => $result
+        ];
     }
 
     /**
@@ -422,6 +600,103 @@ class Order extends BaseModel
         } else {
             return false;
         }
+    }
+
+    /**
+     * 当日汇总
+     * @param $today
+     * @return array
+     */
+    public function getTodaySummary($today)
+    {
+        $query = $this->db
+            ->where('dates', $today)
+            ->where('status', 2);
+        $total = $query->sum('total_fee');
+        $count = $query->count();
+        $sum = Db::query("select count(*) as total from (select `user` from `bx_orders` where status = 2 and dates = ".$today." group by `user`) a");
+        return [
+            'total' => $total / 100,
+            'count' => $count,
+            'sum' => $sum[0]['total']
+        ];
+    }
+
+    /**
+     * 七日订单汇总
+     * @param $startDay
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getReportWeek($startDay)
+    {
+        $result = $this->db
+            ->field('dates, sum(total_fee) as total_fee')
+            ->where('dates', '>=', $startDay)
+            ->where('status', 2)
+            ->group('dates')
+            ->order('dates asc')->select();
+        Log::sql("七日订单额汇总：" . $this->db->getLastSql());
+        return $result;
+    }
+
+    /**
+     * 七日订单汇总
+     * @param $startDay
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getCountWeek($startDay)
+    {
+        $result = $this->db
+            ->field('dates, count(*) as count')
+            ->where('dates', '>=', $startDay)
+            ->where('status', 2)
+            ->group('dates')
+            ->order('dates asc')->select();
+        Log::sql("七日订单数汇总：" . $this->db->getLastSql());
+        return $result;
+    }
+
+    /**
+     * 七日订单汇总
+     * @param $startDay
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getRatioWeek($startDay)
+    {
+        $result = $this->db
+            ->field('`group`, count(*) as count')
+            ->where('dates', '>=', $startDay)
+            ->where('status', 2)
+            ->group('`group`')->select();
+        Log::sql("七日订单率汇总：" . $this->db->getLastSql());
+        return $result;
+    }
+
+    /**
+     * 异常订单报告
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function getAbnormalList()
+    {
+        $result = $this->db
+            ->where('status', 'in', [1, 3, 4])
+            ->order('id', 'desc')
+            ->limit(10)
+            ->select();
+        Log::sql("异常订单报告：" . $this->db->getLastSql());
+        return $result;
     }
 
 }
