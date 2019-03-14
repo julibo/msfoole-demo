@@ -59,7 +59,7 @@ class PaymentApi
     public function createOrder(array $param, int $service)
     {
         try {
-            Log::info('Refund:订单创建开始：{message}', ['message'=>json_encode($param)]);
+            Log::info('createOrder:订单创建开始：{message}', ['message'=>json_encode($param)]);
             $this->reqHandler->setReqParams($param, array('method'));
             switch ($service) {
                 case 1:
@@ -82,6 +82,7 @@ class PaymentApi
             $this->reqHandler->setParameter('notify_url',$this->cfg['notify_url']);
             $this->reqHandler->setParameter('nonce_str', $param['nonce_str']); //随机字符串，必填项，不长于 32 位
             $this->reqHandler->createSign();//创建签名
+            Log::info('createOrder:订单创建签名：{message}', ['message'=>json_encode($this->reqHandler->getAllParameters())]);
             $data = Utils::toXml($this->reqHandler->getAllParameters());
             $this->pay->setReqContent($this->reqHandler->getGateURL(),$data);
             if($this->pay->call()) {
@@ -108,7 +109,7 @@ class PaymentApi
                 throw new Exception($this->pay->getErrInfo(), 560);
             }
         } catch (\Throwable $e) {
-            Log::info('PayCode:二维码创建失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
+            Log::info('createOrder:二维码创建失败：message-{message},code--{code}', ['message'=>$e->getMessage(), 'code'=>$e->getCode()]);
             return false;
         }
     }

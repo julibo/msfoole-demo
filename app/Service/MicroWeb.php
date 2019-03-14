@@ -492,7 +492,7 @@ class MicroWeb extends BaseServer
      * @return array
      * @throws Exception
      */
-    public function payDetail($cardNo, $mzh)
+    public function payDetail($cardNo, $mzh, $skbs)
     {
         if (empty($cardNo) || empty($mzh)) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
@@ -501,10 +501,20 @@ class MicroWeb extends BaseServer
         $response = $this->hospitalApi->apiClient('getjfmx', ['kh' => $cardNo]);
         if (!empty($response) && !empty($response['item'])) {
             foreach ($response['item'] as $vo) {
-                if ($vo['mzh'] == $mzh) {
-                    $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
-                    $vo['money'] = sprintf('￥%s', $vo['je']);
-                    $result = $vo;
+                if ($skbs) {
+                    if ($vo['skbs'] == $skbs) {
+                        $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
+                        $vo['money'] = sprintf('￥%s', $vo['je']);
+                        $result = $vo;
+                        break;
+                    }
+                } else {
+                    if ($vo['mzh'] == $mzh && empty($vo['skbs'])) {
+                        $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
+                        $vo['money'] = sprintf('￥%s', $vo['je']);
+                        $result = $vo;
+                        break;
+                    }
                 }
             }
         }

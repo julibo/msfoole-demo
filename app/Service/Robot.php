@@ -618,12 +618,12 @@ class Robot extends BaseServer
             // 推送模板消息
             $openid = $info['openid'];
             $mzh = $info['mzh'];
-            $ksbs = $payResult['ksbs'];
+            $skbs = $payResult['skbs'];
             $money = "￥". $info['zfje'];
             $name = $info['name'];
-            $url = sprintf('%s/?token=%s&path=%s&mzh=%s&cardno=%s',
-                Config::get('wechat.baseurl'), $openid, 'payDetails', $mzh, $info['kh']);
-            Wechat::getInstance()->sendTemplateMessagePayment($openid, $url, $ksbs, $money, $name);
+            $url = sprintf('%s/?token=%s&path=%s&mzh=%s&cardno=%s&skbs=',
+                Config::get('wechat.baseurl'), $openid, 'payDetails', $mzh, $info['kh'], $skbs);
+            Wechat::getInstance()->sendTemplateMessagePayment($openid, $url, $skbs, $money, $name);
         } else {
             // 原路返回款项
             $params = [
