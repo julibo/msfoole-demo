@@ -502,7 +502,7 @@ class MicroWeb extends BaseServer
         if (!empty($response) && !empty($response['item'])) {
             foreach ($response['item'] as $vo) {
                 if ($skbs) {
-                    if ($vo['skbs'] == $skbs) {
+                    if ($vo['skbs'] == $skbs || $vo['sjh'] == $skbs) {
                         $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
                         $vo['money'] = sprintf('￥%s', $vo['je']);
                         $result = $vo;

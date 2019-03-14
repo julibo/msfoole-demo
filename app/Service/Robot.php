@@ -621,7 +621,7 @@ class Robot extends BaseServer
             $skbs = $payResult['skbs'];
             $money = "￥". $info['zfje'];
             $name = $info['name'];
-            $url = sprintf('%s/?token=%s&path=%s&mzh=%s&cardno=%s&skbs=',
+            $url = sprintf('%s/?token=%s&path=%s&mzh=%s&cardno=%s&skbs=%s',
                 Config::get('wechat.baseurl'), $openid, 'payDetails', $mzh, $info['kh'], $skbs);
             Wechat::getInstance()->sendTemplateMessagePayment($openid, $url, $skbs, $money, $name);
         } else {
