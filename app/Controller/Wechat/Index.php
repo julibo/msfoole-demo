@@ -235,8 +235,8 @@ class Index extends BaseController
     {
         $cardNo = $this->params['cardno'] ?? null;
         $mzh = $this->params['mzh'] ?? null;
-        $sksb = $this->params['sksb'] ?? null;
-        $result = $this->wechat->payDetail($cardNo, $mzh, $sksb);
+        $skbs = $this->params['skbs'] ?? null;
+        $result = $this->wechat->payDetail($cardNo, $mzh, $skbs);
         return $result;
     }
 

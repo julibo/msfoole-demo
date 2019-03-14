@@ -59,7 +59,7 @@ PAY__WEIFUTONG__URL: https://pay.swiftpass.cn/pay/gateway
 PAY__WEIFUTONG__NOTIFY_URL: http://wap.xdbxyy.com/Index/Payment/callbackWFT
 PAY__WEIFUTONG__MCHID: '160530012707'
 PAY__WEIFUTONG__KEY: '603896c8dcbbd062434533cc4d4ad51a'
-PAY__WEIFUTONG__OP_USER_ID: 'bxyy123456'
+PAY__WEIFUTONG__OP_USER_ID: '33514891'
 # wechat
 WECHAT__BASEURL: http://wx.xdbxyy.com
 WECHAT__OPTION__DEBUG: false
