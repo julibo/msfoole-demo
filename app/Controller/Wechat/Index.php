@@ -353,4 +353,14 @@ class Index extends BaseController
         return $result;
     }
 
+    /**
+     * 发送验证码
+     */
+    public function sending()
+    {
+        $openid = $this->user['openid'];
+        $result = $this->wechat->sending($openid, $this->params);
+        return $result;
+    }
+
 }

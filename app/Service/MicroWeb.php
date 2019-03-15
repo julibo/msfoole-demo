@@ -8,6 +8,7 @@ namespace App\Service;
 use Julibo\Msfoole\Exception;
 use App\Model\WechatCard as WechatCardModel;
 use App\Model\Order as OrderModel;
+use App\Lib\Helper\Message;
 use App\Validator\Feedback;
 use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
@@ -48,17 +49,21 @@ class MicroWeb extends BaseServer
      * @return mixed
      * @throws Exception
      */
-    public function bindCard(string $openid, array $params)
+    public function bindCard($openid, array $params)
     {
         if (empty($params) || empty($params['name']) || empty($params['cardno']) || empty($params['idcard']) ||
-            empty($params['mobile'])) {
+            empty($params['mobile']) || empty($params['code'])) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
+        $auth = $this->cache->get($openid);
+        if (empty($auth) || empty($auth['code']) || $auth['code'] != $params['code']) {
+            throw new Exception('验证码错误', Feedback::$Exception['SERVICE_DATA_ERROR']['code']);
         }
         $params['cardno'] =  str_pad($params['cardno'],8,'0',STR_PAD_LEFT);
         // 通过卡号查询用户信息
         $user = $this->hospitalApi->getUser($params['cardno']);
-        if (empty($user) || $user['xm'] != $params['name']) {
-            throw new Exception('卡号与姓名不匹配', Feedback::$Exception['SERVICE_DATA_ERROR']['code']);
+        if (empty($user) || $user['xm'] != $params['name'] || $user['mobile'] != $params['mobile']) {
+            throw new Exception('录入信息有误', Feedback::$Exception['SERVICE_DATA_ERROR']['code']);
         }
         $list = WechatCardModel::getInstance()->getBindCard($openid);
         $params['default'] = 1;
@@ -82,7 +87,7 @@ class MicroWeb extends BaseServer
      * @return mixed
      * @throws Exception
      */
-    public function userCard(string $openid)
+    public function userCard($openid)
     {
         if (empty($openid)) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
@@ -98,7 +103,7 @@ class MicroWeb extends BaseServer
      * @return mixed
      * @throws Exception
      */
-    public function defaultCard(string $openid, string $id)
+    public function defaultCard($openid, $id)
     {
         if (empty($id)) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
@@ -114,7 +119,7 @@ class MicroWeb extends BaseServer
      * @return mixed
      * @throws Exception
      */
-    public function showCard(string $openid, string $id)
+    public function showCard($openid, $id)
     {
         if (empty($id)) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
@@ -130,7 +135,7 @@ class MicroWeb extends BaseServer
      * @return mixed
      * @throws Exception
      */
-    public function delCard(string $openid, string $id)
+    public function delCard($openid, $id)
     {
         if (empty($id)) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
@@ -770,6 +775,46 @@ class MicroWeb extends BaseServer
         }
         $order['info'] = json_decode($order['info'], true);
         return $order;
+    }
+
+    /**
+     * 发送验证码
+     * @param $openid
+     * @param $params
+     * @return array
+     */
+    public function sending($openid, $params)
+    {
+        try {
+            if (empty($params) || empty($params['name']) || empty($params['cardno']) || empty($params['mobile'])) {
+                throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+            }
+            $params['cardno'] =  str_pad($params['cardno'],8,'0',STR_PAD_LEFT);
+            // 通过卡号查询用户信息
+            $user = $this->hospitalApi->getUser($params['cardno']);
+            if (empty($user['mobile'])) {
+                throw new Exception('没有绑定手机号', 5);
+            }
+            if ($user['mobile'] != $params['mobile']) {
+                throw new Exception('手机号不匹配', 5);
+            }
+            if ($user['xm'] != $params['name']) {
+                throw new Exception('姓名不匹配', 5);
+            }
+            // 发送验证码
+            $auth = $this->cache->get($openid);
+            $code = rand(1000,9999);
+            $auth['code'] = $code;
+            $this->cache->set($openid, $auth);
+            $msgResult = Message::sendSms($user['mobile'], sprintf("您正在使用手机认证服务，您的短信验证码为%s。验证码切勿告知他人，以免造成不必要的困扰，此验证码10分钟内有效。", $code));
+            if ($msgResult) {
+                return ['result'=>true, 'msg'=>'认证短信发送成功'];
+            } else {
+                return ['result'=>false, 'msg'=>'认证短信发送失败'];
+            }
+        } catch (\Exception $e) {
+            return ['result'=>false, 'msg'=>$e->getMessage()];
+        }
     }
 
 }
