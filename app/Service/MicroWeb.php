@@ -12,6 +12,7 @@ use App\Lib\Helper\Message;
 use App\Validator\Feedback;
 use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
+use App\Lib\Code\QrCode;
 
 class MicroWeb extends BaseServer
 {
@@ -491,6 +492,24 @@ class MicroWeb extends BaseServer
     }
 
     /**
+     * 获取二维码
+     * @param $code
+     * @return string
+     * @throws \Exception
+     */
+    private function getQRcode($code)
+    {
+        $path = '/data/wwwroot/wechat.xdbxyy.com/qrcode/';
+        $file = sprintf('%s%s.png', $path, $code);
+        if (!file_exists($file)) {
+            $filename = QrCode::getQrCode($code, $path);
+        } else {
+            $filename = sprintf('%s.png', $code);
+        }
+        return sprintf('/qrcode/%s', $filename);
+    }
+
+    /**
      * 缴费明细
      * @param $cardNo
      * @param $mzh
@@ -508,6 +527,7 @@ class MicroWeb extends BaseServer
             foreach ($response['item'] as $vo) {
                 if ($skbs) {
                     if ($vo['skbs'] == $skbs || $vo['sjh'] == $skbs) {
+                        $vo['qrcode'] = $this->getQRcode($cardNo);
                         $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
                         $vo['money'] = sprintf('￥%s', $vo['je']);
                         $result = $vo;
@@ -515,6 +535,7 @@ class MicroWeb extends BaseServer
                     }
                 } else {
                     if ($vo['mzh'] == $mzh && empty($vo['skbs'])) {
+                        $vo['qrcode'] = $this->getQRcode($cardNo);
                         $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
                         $vo['money'] = sprintf('￥%s', $vo['je']);
                         $result = $vo;

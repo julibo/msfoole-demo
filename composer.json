@@ -1,6 +1,6 @@
 {
     "name": "julibo/msfoole-demo",
-    "description": "msfoole示例工程",
+    "description": "北新医院挂号缴费系统",
     "type": "project",
     "keywords": [
         "msfoole-demo",
@@ -24,7 +24,7 @@
         }
     ],
     "require": {
-        "julibo/msfoole": "dev-develop"
+        "julibo/msfoole": "dev-master"
     },
     "require-dev": {
         "easyswoole/swoole-ide-helper": "dev-master"
