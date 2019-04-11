@@ -126,6 +126,7 @@ class MicroWeb extends BaseServer
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         $result = WechatCardModel::getInstance()->showCard($openid, $id);
+        $result['qrcode'] = $this->getQRcode($result['cardno']);
         return $result;
     }
 
