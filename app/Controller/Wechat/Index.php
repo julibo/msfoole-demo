@@ -363,4 +363,17 @@ class Index extends BaseController
         return $result;
     }
 
+    /**
+     * 取消预约
+     */
+     public function refund()
+     {
+         $cardno = $this->params['cardno'] ?? null;
+         $mzh = $this->params['mzh'] ?? null;
+         $sjh = $this->params['sjh'] ?? null;
+         $hybh = $this->params['hybh'] ?? null;
+         $result = $this->wechat->refund($cardno, $mzh, $sjh, $hybh);
+         return $result;
+     }
+
 }

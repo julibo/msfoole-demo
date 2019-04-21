@@ -13,6 +13,7 @@ use App\Validator\Feedback;
 use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
 use App\Lib\Code\QrCode;
+use Julibo\Msfoole\Helper;
 
 class MicroWeb extends BaseServer
 {
@@ -837,6 +838,44 @@ class MicroWeb extends BaseServer
         } catch (\Exception $e) {
             return ['result'=>false, 'msg'=>$e->getMessage()];
         }
+    }
+
+    /**
+     * 预约挂号退费
+     * @param $cardno
+     * @param $mzh
+     * @param $sjh
+     * @param $hybh
+     * @return bool
+     * @throws Exception
+     */
+    public function refund($cardno, $mzh, $sjh, $hybh)
+    {
+        # 取得订单
+        $orderResult = OrderModel::getInstance()->getOrderByTradeNo($sjh);
+        if (empty($orderResult)) {
+            throw new Exception('订单不存在或无权操作', 210);
+        }
+        // 先取消挂号再退款
+        $this->hospitalApi->apiClient('qxyydj', [
+            'hybh' => $hybh
+        ]);
+        $params = [
+            'out_trade_no' => $orderResult['out_trade_no'],
+            'out_refund_no' => $orderResult['out_trade_no'] . 'R',
+            'total_fee' => $orderResult['total_fee'],
+            'refund_fee' => $orderResult['total_fee'],
+            'refund_channel' => 'ORIGINAL',
+            'nonce_str' => Helper::guid()
+        ];
+        $refundResult = PaymentApi::getInstance()->submitRefund($params);
+        if ($refundResult) {
+            OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 5);
+        } else {
+            OrderModel::getInstance()->updateOrderStatus($orderResult['id'], 4);
+            throw new Exception('快速退款失败，将转由人工处理', 220);
+        }
+        return 1;
     }
 
 }
