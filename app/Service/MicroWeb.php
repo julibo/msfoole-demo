@@ -449,13 +449,18 @@ class MicroWeb extends BaseServer
                 try {
                     $response = $this->hospitalApi->apiClient('yydjcx', ['kh' => $card['cardno']]);
                     if (!empty($response) && !empty($response['item'])) {
-                        foreach ($response['item'] as &$vo) {
-                            $vo['cardno'] = $card['cardno'];
-                            if (!empty($vo['ghrq'])) {
-                                $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
+                        foreach ($response['item'] as $vo) {
+                            $order = OrderModel::getInstance()->getOrderByCode($vo['mzh']);
+                            if ($order) {
+                                $vo['cardno'] = $card['cardno'];
+                                if (!empty($vo['ghrq'])) {
+                                    $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
+                                }
+                                $result = array_merge($result, $response['item']);
+                                $result[] = $vo;
                             }
                         }
-                        $result = array_merge($result, $response['item']);
+
                     }
                 } catch (\Exception $e) {}
             }
