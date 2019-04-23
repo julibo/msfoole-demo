@@ -456,7 +456,6 @@ class MicroWeb extends BaseServer
                                 if (!empty($vo['ghrq'])) {
                                     $vo['ghrq'] = date('Y-m-d', strtotime($vo['ghrq']));
                                 }
-                                $result = array_merge($result, $response['item']);
                                 $result[] = $vo;
                             }
                         }
