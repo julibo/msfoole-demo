@@ -610,7 +610,7 @@ class Admin extends BaseServer
             2 => 0,
             3 => 0,
         ];
-        $startDay = date('Ymd', strtotime('-20 days'));
+        $startDay = date('Ymd', strtotime('-6 days'));
         $report = OrderModel::getInstance()->getRatioWeek($startDay);
         foreach ($report as $vo) {
             $sum += $vo['count'];
@@ -625,10 +625,10 @@ class Admin extends BaseServer
             }
         }
         $result = [
-            'guahao' => (int)(round($result[0]/$sum, 2) * 100),
-            'menzhen' => (int)(round($result[1]/$sum, 2) * 100),
-            'yuyue' => (int)(round($result[2]/$sum, 2) * 100),
-            'yujiao' => (int)(round($result[3]/$sum, 2) * 100),
+            'guahao' => $sum == 0 ? 0 : (int)(round($result[0]/$sum, 2) * 100),
+            'menzhen' => $sum == 0 ? 0 :  (int)(round($result[1]/$sum, 2) * 100),
+            'yuyue' => $sum == 0 ? 0 : (int)(round($result[2]/$sum, 2) * 100),
+            'yujiao' => $sum == 0 ? 0 : (int)(round($result[3]/$sum, 2) * 100),
         ];
         return $result;
     }
