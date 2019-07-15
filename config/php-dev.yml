@@ -52,7 +52,7 @@ MSFOOLE__OPTION__DAEMONIZE: 0
 MSFOOLE__OPTION__HEARTBEAT_CHECK_INTERVAL: 1
 MSFOOLE__OPTION__HEARTBEAT_IDLE_TIME: 150
 # openAPI
-API__HOSPITAL__HOST: http://www.cdzykc.com/mod_zykc_server
+API__HOSPITAL__HOST: http://www.cdzykc.com:53324/mod_zykc_server
 API__HOSPITAL__USER: 123
 # pay
 PAY__WEIFUTONG__URL: https://pay.swiftpass.cn/pay/gateway

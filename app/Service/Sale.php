@@ -330,4 +330,53 @@ class Sale extends BaseServer
         return $result;
     }
 
+    /**
+     * 获取报告
+     * @param $cardNo
+     * @return array|mixed
+     */
+    public function report($cardNo)
+    {
+        $result = [];
+        $responseCheck = $this->hospitalApi->apiClient('jcxx', ['kh' => $cardNo]);
+        if (!empty($responseCheck) && !empty($responseCheck['item'])) {
+            foreach ($responseCheck['item'] as $vo) {
+                if (!empty($vo['jcxm']) && is_array($vo['jcxm'])) {
+                    foreach ($vo['jcxm'] as $v) {
+                        $res = [];
+                        $res["type"] = 1;
+                        $res['ghrq'] = date("Y-m-d", strtotime($vo['ghrq']));
+                        $res['mzh'] = $vo['mzh'];
+                        $res['ysxm'] = $vo['ysxm'];
+                        $res['byxm'] = $vo['byxm'];
+                        $res['jcxmmc'] = $v['jcxmmc'];
+                        $res['kdxh'] = $v['kdxh'];
+                        $res['jcjg'] = $v['jcjg'][0] ?? new \stdClass();
+                        array_push($result, $res);
+                    }
+                }
+            }
+        }
+        $responseTest = $this->hospitalApi->apiClient('jyxx', ['kh' => $cardNo]);
+        if (!empty($responseTest) && !empty($responseTest['item'])) {
+            foreach ($responseTest['item'] as $vo) {
+                if (!empty($vo['jyxm']) && is_array($vo['jyxm'])) {
+                    foreach ($vo['jyxm'] as $v) {
+                        $res = [];
+                        $res["type"] = 2;
+                        $res['ghrq'] = date("Y-m-d", strtotime($vo['ghrq']));
+                        $res['mzh'] = $vo['mzh'];
+                        $res['ysxm'] = $vo['ysxm'];
+                        $res['byxm'] = $vo['byxm'];
+                        $res['jcxmmc'] = $v['jyxmmc'];
+                        $res['jytmh'] = $v['jytmh'] ?? "";
+                        $res['jyjg'] = empty($v['jyjg']) ? [] : $v['jyjg'];
+                        $res['shjg'] = empty($v['shjg']) ? [] : $v['shjg'];
+                        array_push($result, $res);
+                    }
+                }
+            }
+        }
+        return $result;
+    }
 }

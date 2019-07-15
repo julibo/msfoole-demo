@@ -126,4 +126,15 @@ class Sale extends BaseController
         $result = SaleService::getInstance()->getOrder($cardNo, $tradeNo);
         return $result;
     }
+
+    /**
+     * 检查报告
+     */
+    public function report()
+    {
+        $cardNo = $this->user['cardno'] ?? null;
+        $result = SaleService::getInstance()->report($cardNo);
+        return $result;
+    }
+
 }
