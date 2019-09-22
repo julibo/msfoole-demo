@@ -337,6 +337,11 @@ class MicroWeb extends BaseServer
         if ($orderData == false) {
             throw new Exception(Feedback::$Exception['SERVICE_SQL_ERROR']['msg'], Feedback::$Exception['SERVICE_SQL_ERROR']['code']);
         }
+        // todo 查询卡号有效性
+        $user = HospitalApi::getInstance()->getUser($cardNo);
+        if (empty($user)) {
+            throw new Exception("该卡号不可用", Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
         $orderData['sub_openid'] = $openid;
         $orderData['is_raw'] = $is_raw;
         $orderData['time_start'] = date('YmdHis', strtotime($orderData['time_start']));
@@ -767,6 +772,11 @@ class MicroWeb extends BaseServer
         $orderData = OrderModel::getInstance()->createWechatTodayOrder($openid, $cardNo, $name, $ysbh, $bb, $zfje, $zfzl, $ksbm, $ksmc, $ysxm, $bbmc, $ghlb, $lbmc, $ip, $body);
         if ($orderData == false) {
             throw new Exception(Feedback::$Exception['SERVICE_SQL_ERROR']['msg'], Feedback::$Exception['SERVICE_SQL_ERROR']['code']);
+        }
+        // todo 查询卡号有效性
+        $user = HospitalApi::getInstance()->getUser($cardNo);
+        if (empty($user)) {
+            throw new Exception("该卡号不可用", Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         $orderData['sub_openid'] = $openid;
         $orderData['is_raw'] = $is_raw;
