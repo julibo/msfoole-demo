@@ -76,17 +76,17 @@ class Api extends BaseController
                         1 => array (
                             'type' => 'view',
                             'name' => '科室介绍',
-                            'url' => 'https://mp.weixin.qq.com/s/YObnWbM1QrMx7yKVP72kSQ',
+                            'url' => 'http://wx.xdbxyy.com/department',
                         ),
                         2 => array (
                             'type' => 'view',
-                            'name' => '医生简介',
-                            'url' => 'https://mp.weixin.qq.com/s/xHRhW21PJ1ydEm_Y8Ilt3A',
+                            'name' => '最新动态',
+                            'url' => 'http://www.xdbxyy.com/zxdt/',
                         ),
                         3 => array (
                             'type' => 'view',
-                            'name' => '楼层分布',
-                            'url' => 'https://mp.weixin.qq.com/s/isRsKv_zsU-DgFiNXlS3ww',
+                            'name' => '微官网',
+                            'url' => 'http://www.xdbxyy.com/',
                         ),
                         4 => array (
                             'type' => 'view',
@@ -118,11 +118,6 @@ class Api extends BaseController
                             'name' => '住院费预交',
                             'url' => $this->wechat->getOauthRedirect($callback, 'hospitalization'),
                         ),
-                        4 => array (
-                            'type' => 'view',
-                            'name' => '健康宣教',
-                            'url' => 'https://mp.weixin.qq.com/s/v0sHVhXD89p3exMJpr1ClA',
-                        )
                     ),
                 ),
      	        2 => array (
