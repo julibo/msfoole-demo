@@ -76,7 +76,7 @@ class Api extends BaseController
                         1 => array (
                             'type' => 'view',
                             'name' => '科室介绍',
-                            'url' => 'http://wx.xdbxyy.com/department',
+                            'url' => $this->wechat->getOauthRedirect($callback, 'department'),
                         ),
                         2 => array (
                             'type' => 'view',
