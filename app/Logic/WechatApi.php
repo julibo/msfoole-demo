@@ -23,12 +23,13 @@ class WechatApi extends Wechat
     public function checkAuth($appid='',$appsecret='',$token='')
     {
         $authname = 'wechat_access_token'.$this->appid;
-        if ($rs = $this->getCache($authname))  {
+        if (false && $rs = $this->getCache($authname))  {
             $this->access_token = $rs;
             return $rs;
         } else {
-            $this->access_token = $this->http_get('http://45.40.202.228/wechat.php');
-            $this->setCache($authname, $this->access_token, 3600);
+            // $this->access_token = $this->http_get('http://45.40.202.228/wechat.php');
+            // $this->setCache($authname, $this->access_token, 3600);
+            $this->access_token = $this->http_get('http://45.40.202.228/wechat.php?token=61000caa27589aba2cfa42723506ec85');
             return $this->access_token;
         }
     }
