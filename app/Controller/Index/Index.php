@@ -69,7 +69,7 @@ class Index extends BaseController
      */
     public function sending()
     {
-        $result = SaleService::getInstance()->sending($this->params);
+        $result = $this->server->sending($this->params);
         return $result;
     }
 
@@ -78,7 +78,7 @@ class Index extends BaseController
      */
     public function register()
     {
-        $result = SaleService::getInstance()->register($this->params);
+        $result = $this->server->register($this->params);
         return $result;
     }
 
