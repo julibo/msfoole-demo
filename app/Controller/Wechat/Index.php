@@ -7,6 +7,7 @@ namespace App\Controller\Wechat;
 
 use App\Service\MicroWeb;
 use Julibo\Msfoole\HttpController as BaseController;
+use App\Service\Sale as SaleService;
 
 class Index extends BaseController
 {
@@ -375,5 +376,28 @@ class Index extends BaseController
          $result = $this->wechat->refund($cardno, $mzh, $sjh, $hybh);
          return $result;
      }
+
+    /**
+     * 发送验证码
+     */
+    public function sendCode()
+    {
+        $this->saleService = SaleService::getInstance();
+        $this->saleService->setCache($this->cache);
+        $result = $this->saleService->sending($this->params);
+        return $result;
+    }
+
+    /**
+     * 无卡注册
+     */
+    public function register()
+    {
+        $this->saleService = SaleService::getInstance();
+        $this->saleService->setCache($this->cache);
+        $result = $this->saleService->register($this->params);
+        return $result;
+    }
+
 
 }
