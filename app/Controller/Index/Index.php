@@ -64,4 +64,22 @@ class Index extends BaseController
         return $result;
     }
 
+    /**
+     * 发送验证码
+     */
+    public function sending()
+    {
+        $result = SaleService::getInstance()->sending($this->params);
+        return $result;
+    }
+
+    /**
+     * 无卡注册
+     */
+    public function register()
+    {
+        $result = SaleService::getInstance()->register($this->params);
+        return $result;
+    }
+
 }

@@ -379,4 +379,138 @@ class Sale extends BaseServer
         }
         return $result;
     }
+
+    /**
+     * @param array $params
+     * @return array
+     */
+    public function sending(array $params)
+    {
+        try {
+            if (empty($params) || empty($params['name']) || empty($params['idcard']) || empty($params['mobile']) || $params['idcard'] == $params['mobile']) {
+                throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+            }
+            if (!self::isMobile($params['mobile'])) {
+                throw new Exception('手机号码有误', Feedback::$Exception['PARAMETER_MISSING']['code']);
+            }
+            if (!self::isIdcard($params['idcard'])) {
+                throw new Exception('身份证号码有误', Feedback::$Exception['PARAMETER_MISSING']['code']);
+            }
+            // 发送验证码
+            $code = rand(1000,9999);
+            $key = "mobile:" . $params['mobile'];
+            $this->cache->set($key, $code, 600);
+            $msgResult = Message::sendSms($params['mobile'], sprintf("您正在使用手机认证服务，您的短信验证码为%s。验证码切勿告知他人，以免造成不必要的困扰，此验证码10分钟内有效。", $code));
+            if ($msgResult) {
+                return ['result'=>true, 'msg'=>'认证短信发送成功'];
+            } else {
+                return ['result'=>false, 'msg'=>'认证短信发送失败'];
+            }
+        } catch (\Exception $e) {
+            return ['result'=>false, 'msg'=>$e->getMessage()];
+        }
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     */
+    public function register(array $params)
+    {
+        if (empty($params) || empty($params['name']) || empty($params['idcard']) || empty($params['mobile']) || empty($params['code'])) {
+            throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
+        $key = "mobile:" . $params['mobile'];
+        if ($this->cache->get($key) != $params['code']) {
+            throw new Exception("短信验证码有误", Feedback::$Exception['AUTH_SIGN_ERROR']['code']);
+        }
+        if (!self::isIdcard($params['idcard'])) {
+            throw new Exception('身份证号码有误', Feedback::$Exception['PARAMETER_MISSING']['code']);
+        }
+        // 通过卡号或手机号查询用户
+        $user = HospitalApi::getInstance()->apiClient('zdzc', [
+            'sfzh' => $params['idcard'],
+            'xm' => $params['name'],
+            'sjh' => $params['mobile']
+        ]);
+        return $user;
+    }
+
+
+    /**
+     * 验证手机号是否正确
+     * @param $mobile
+     * @return bool
+     */
+    public static function isMobile($mobile) {
+        if (!is_numeric($mobile)) {
+            return false;
+        }
+        return preg_match('#^1[3,4,5,7,8,9]{1}[\d]{9}$#', $mobile) ? true : false;
+    }
+
+    /**
+     * 身份证号验证
+     * @param $id
+     * @return bool
+     */
+    public static function isIdcard( $id )
+    {
+        $id = strtoupper($id);
+        $regx = "/(^\d{15}$)|(^\d{17}([0-9]|X)$)/";
+        $arr_split = array();
+        if(!preg_match($regx, $id))
+        {
+            return FALSE;
+        }
+        if(15==strlen($id)) //检查15位
+        {
+            $regx = "/^(\d{6})+(\d{2})+(\d{2})+(\d{2})+(\d{3})$/";
+
+            @preg_match($regx, $id, $arr_split);
+            //检查生日日期是否正确
+            $dtm_birth = "19".$arr_split[2] . '/' . $arr_split[3]. '/' .$arr_split[4];
+            if(!strtotime($dtm_birth))
+            {
+                return FALSE;
+            } else {
+                return TRUE;
+            }
+        }
+        else      //检查18位
+        {
+            $regx = "/^(\d{6})+(\d{4})+(\d{2})+(\d{2})+(\d{3})([0-9]|X)$/";
+            @preg_match($regx, $id, $arr_split);
+            $dtm_birth = $arr_split[2] . '/' . $arr_split[3]. '/' .$arr_split[4];
+            if(!strtotime($dtm_birth)) //检查生日日期是否正确
+            {
+                return FALSE;
+            }
+            else
+            {
+                //检验18位身份证的校验码是否正确。
+                //校验位按照ISO 7064:1983.MOD 11-2的规定生成，X可以认为是数字10。
+                $arr_int = array(7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2);
+                $arr_ch = array('1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2');
+                $sign = 0;
+                for ( $i = 0; $i < 17; $i++ )
+                {
+                    $b = (int) $id{$i};
+                    $w = $arr_int[$i];
+                    $sign += $b * $w;
+                }
+                $n = $sign % 11;
+                $val_num = $arr_ch[$n];
+                if ($val_num != substr($id,17, 1))
+                {
+                    return FALSE;
+                } //phpfensi.com
+                else
+                {
+                    return TRUE;
+                }
+            }
+        }
+
+    }
 }
