@@ -4,6 +4,7 @@
  */
 namespace App\Service;
 
+use App\Model\WechatCard as WechatCardModel;
 use Julibo\Msfoole\Exception;
 use Julibo\Msfoole\Helper;
 use App\Lib\Helper\Message;
@@ -415,7 +416,7 @@ class Sale extends BaseServer
      * @param array $params
      * @return array
      */
-    public function register(array $params)
+    public function register($openid, array $params)
     {
         if (empty($params) || empty($params['name']) || empty($params['idcard']) || empty($params['mobile']) || empty($params['code'])) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
@@ -427,12 +428,37 @@ class Sale extends BaseServer
         if (!self::isIdcard($params['idcard'])) {
             throw new Exception('身份证号码有误', Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
-        // 通过卡号或手机号查询用户
         $user = HospitalApi::getInstance()->apiClient('zdzc', [
             'sfzh' => $params['idcard'],
             'xm' => $params['name'],
             'sjh' => $params['mobile']
         ]);
+
+        $data = [
+            'cardno' => $params['idcard'],
+            'name' => $params['name'],
+            'idcard' => $params['idcard'],
+            'mobile' => $params['mobile']
+
+        ];
+        $zx = 1;
+        $list = WechatCardModel::getInstance()->getBindCard($openid);
+        $data['default'] = 1;
+        if (!empty($list)) {
+            foreach ($list as $v) {
+                if ($v['cardno'] == $data['cardno']) {
+                    $zx = 0;
+                    break;
+                }
+                if ($v['default'] == 1) {
+                    $data['default'] = 0;
+                    break;
+                }
+            }
+        }
+        if ($zx) {
+            WechatCardModel::getInstance()->bindCard($openid, $data);
+        }
         return $user;
     }
 

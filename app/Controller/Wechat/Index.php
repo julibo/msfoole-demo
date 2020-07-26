@@ -393,9 +393,10 @@ class Index extends BaseController
      */
     public function register()
     {
+        $openid = $this->user['openid'];
         $this->saleService = SaleService::getInstance();
         $this->saleService->setCache($this->cache);
-        $result = $this->saleService->register($this->params);
+        $result = $this->saleService->register($openid, $this->params);
         return $result;
     }
 
