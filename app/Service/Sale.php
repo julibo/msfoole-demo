@@ -418,7 +418,7 @@ class Sale extends BaseServer
      */
     public function register($openid, array $params)
     {
-        if (empty($params) || empty($params['name']) || empty($params['idcard']) || empty($params['mobile']) || empty($params['code'])) {
+        if (empty($params) || empty($params['name']) || empty($params['idcard']) || empty($params['mobile']) || empty($params['code']) || empty($params['address'])) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         $key = "mobile:" . $params['mobile'];
@@ -431,7 +431,12 @@ class Sale extends BaseServer
         $user = HospitalApi::getInstance()->apiClient('zdzc', [
             'sfzh' => $params['idcard'],
             'xm' => $params['name'],
-            'sjh' => $params['mobile']
+            'sjh' => $params['mobile'],
+            'dz' => $params['address'],
+            'xb' => $params['sex'],
+            'hy' => $params['marriage'],
+            'mz' => $params['nation'],
+            'zy' => $params['vocation']
         ]);
 
         $data = [
@@ -439,7 +444,6 @@ class Sale extends BaseServer
             'name' => $params['name'],
             'idcard' => $params['idcard'],
             'mobile' => $params['mobile']
-
         ];
         $zx = 1;
         $list = WechatCardModel::getInstance()->getBindCard($openid);

@@ -400,5 +400,14 @@ class Index extends BaseController
         return $result;
     }
 
+    /**
+     * 流行病学史及相关信息
+     */
+    public function xinguan()
+    {
+        $result = $this->wechat->xinguan($this->params);
+        return $result;
+    }
+
 
 }

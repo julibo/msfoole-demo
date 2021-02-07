@@ -14,6 +14,7 @@ use App\Logic\HospitalApi;
 use App\Logic\PaymentApi;
 use App\Lib\Code\QrCode;
 use Julibo\Msfoole\Helper;
+use App\Model\XinGuan;
 
 class MicroWeb extends BaseServer
 {
@@ -79,6 +80,7 @@ class MicroWeb extends BaseServer
                 }
             }
         }
+        $params['cardno'] = $user['dabh'];
         $result = WechatCardModel::getInstance()->bindCard($openid, $params);
         return $result;
     }
@@ -890,6 +892,19 @@ class MicroWeb extends BaseServer
             throw new Exception('快速退款失败，将转由人工处理', 220);
         }
         return 1;
+    }
+
+    /**
+    * 流行病学史及相关信息
+     */
+    public function xinguan(array $data)
+    {
+        $repeat = XinGuan::getInstance()->findRepeat($data['idCard']);
+        if ($repeat) {
+            return false;
+        }
+        $result = XinGuan::getInstance()->chushai($data);
+        return $result;
     }
 
 }
