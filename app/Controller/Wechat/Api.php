@@ -143,6 +143,11 @@ class Api extends BaseController
                                 'name' => '检查报告',
                                 'url' => $this->wechat->getOauthRedirect($callback, 'report'),
                             ),
+                            4 => array (
+                                'type' => 'view',
+                                'name' => '新冠初筛',
+                                'url' => $this->wechat->getOauthRedirect($callback, 'xinguan'),
+                            ),
                     ),
      	        ),
       	    ),
