@@ -433,7 +433,7 @@ class Sale extends BaseServer
             'xm' => $params['name'],
             'sjh' => $params['mobile'],
             'dz' => $params['address'] ?? "",
-            'xb' => $params['sex'] ?? "密",
+            'xb' => $params['sex'] ?? "保密",
             'hy' => $params['marriage'] ?? "保密",
             'mz' => $params['nation'] ?? "保密",
             'zy' => $params['vocation'] ?? "保密"
