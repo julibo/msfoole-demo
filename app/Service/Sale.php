@@ -418,7 +418,7 @@ class Sale extends BaseServer
      */
     public function register($openid, array $params)
     {
-        if (empty($params) || empty($params['name']) || empty($params['idcard']) || empty($params['mobile']) || empty($params['code']) || empty($params['address'])) {
+        if (empty($params) || empty($params['name']) || empty($params['idcard']) || empty($params['mobile']) || empty($params['code'])) {
             throw new Exception(Feedback::$Exception['PARAMETER_MISSING']['msg'], Feedback::$Exception['PARAMETER_MISSING']['code']);
         }
         $key = "mobile:" . $params['mobile'];
@@ -432,11 +432,11 @@ class Sale extends BaseServer
             'sfzh' => $params['idcard'],
             'xm' => $params['name'],
             'sjh' => $params['mobile'],
-            'dz' => $params['address'],
-            'xb' => $params['sex'],
-            'hy' => $params['marriage'],
-            'mz' => $params['nation'],
-            'zy' => $params['vocation']
+            'dz' => $params['address'] ?? "",
+            'xb' => $params['sex'] ?? "密",
+            'hy' => $params['marriage'] ?? "保密",
+            'mz' => $params['nation'] ?? "保密",
+            'zy' => $params['vocation'] ?? "保密"
         ]);
 
         $data = [
